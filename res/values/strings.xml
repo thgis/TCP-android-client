@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Hello World, ChatterActivity!</string>
+    <string name="app_name">Chatter</string>
+    <string name="dataToSend">Sendt</string>
+    <string name="dataRecieved">Data modtaget</string>
+    <string name="btnSend">Send Tekst</string>
+    <string name="connect">Forbind</string>
+    <string name="readData">Læs data</string>
+    <string name="serverip">Server IP:</string>
+</resources>
