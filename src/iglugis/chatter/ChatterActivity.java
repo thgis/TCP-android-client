@@ -16,7 +16,6 @@ public class ChatterActivity extends Activity {
 	private EditText textUser;
 	private EditText serverIP;
 	
-    /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,11 +32,6 @@ public class ChatterActivity extends Activity {
     }
     
     @Override
-    protected void onPause() {
-    	super.onPause();
-    }
-    
-    @Override
     protected void onStop() {
     	if(client != null)
     		client.Stop();
@@ -46,22 +40,20 @@ public class ChatterActivity extends Activity {
     
     private Handler handlerClient = new Handler() {
    	 
-        public void handleMessage(Message msg) {
-          if (msg.what == 0) {
-            textReceived.append((String)msg.obj + "\n" );
-          }
-        }
-      };
+    	public void handleMessage(Message msg) {
+    		if (msg.what == 0) {
+    			textReceived.append((String)msg.obj + "\n" );
+    		}
+    	}
+    };
     
-    public void Connect(View view)
-    {
+    public void Connect(View view) {
     	ipAddress = serverIP.getText().toString();
-    	client = new Client(ipAddress,textUser.getText().toString(),handlerClient);
+    	client = new Client(ipAddress, textUser.getText().toString(),handlerClient);
     	client.Start();
     }
     
-    public void Send(View view)
-    {
+    public void Send(View view) {
     	String msg = textToSend.getText().toString();
     	client.SendMessage(msg);
     	textToSend.setText("");
