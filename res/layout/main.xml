@@ -77,7 +77,8 @@
 		        android:layout_height="wrap_content" 
 		        android:id="@+id/button1" 
 		        android:onClick="Send" 
-		        android:layout_width="wrap_content" 
+		        android:layout_width="wrap_content"
+		        android:enabled="false"
 		        android:text="@string/btnSend"/>
 	    </LinearLayout>
     </ScrollView>

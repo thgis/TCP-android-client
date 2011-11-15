@@ -8,6 +8,7 @@ import android.os.Message;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 
 public class ChatterActivity extends Activity {
@@ -95,6 +96,9 @@ public class ChatterActivity extends Activity {
     public void Connect(View view) {
     	client = new Client(mIpAddress, mUserName, handlerClient);
     	client.Start();
+    	Button sendBtn = (Button) findViewById(R.id.button1);
+    	sendBtn.setEnabled(true);
+    	
     }
     
     public void Send(View view) {

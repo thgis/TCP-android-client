@@ -49,7 +49,7 @@ public class Client implements Runnable {
 	        {
 	        	 instream.read(buffer, 0, bytes);
 	        	 String test = new String(buffer,0,bytes);
-	 	         
+	 	    
 	        	 Message lmsg = new Message();
 	 	         lmsg.what = 0;
 	 	         lmsg.obj = test;
@@ -64,10 +64,14 @@ public class Client implements Runnable {
     
     public void SendMessage(String msg)
     {
+    	byte[] startByte= {0x02};
+    	byte[] endByte= {0x10,0x03};
         byte[] msgByte = msg.getBytes();
         
         try {
+        	outStream.write(startByte, 0, startByte.length);
 			outStream.write(msgByte, 0, msgByte.length);
+			outStream.write(endByte, 0, endByte.length);
 			outStream.flush();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
