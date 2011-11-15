@@ -3,28 +3,82 @@
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:weightSum="1" xmlns:android1="http://schemas.android.com/apk/res/android">
-    <ScrollView android:id="@+id/scroll" android:layout_width="fill_parent"
-    android:layout_height="wrap_content">
-    <LinearLayout android:id="@+id/container"
-        android:orientation="vertical" android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
-        <LinearLayout android1:layout_width="match_parent" android1:layout_height="wrap_content" android1:id="@+id/LinearLayout1" android1:orientation="horizontal">
-            <TextView android1:id="@+id/textView4" android1:text="@string/serverip" android1:layout_width="wrap_content" android1:layout_height="wrap_content"></TextView>
-            <EditText android1:layout_width="match_parent" android1:layout_height="wrap_content" android1:id="@+id/ETServerIP"></EditText>
-        </LinearLayout>
-    <LinearLayout android:layout_height="wrap_content" android:id="@+id/linearLayout1" android:layout_width="match_parent">
-        <TextView android:layout_height="wrap_content" android:text="Username:" android:layout_width="wrap_content" android:id="@+id/textView1" android:layout_weight="1"></TextView>
-        <EditText android:layout_height="wrap_content" android:inputType="textPersonName" android:id="@+id/ETUserName" android:layout_width="173dp" android:layout_weight="1">
-            <requestFocus></requestFocus>
-        </EditText>
-        <Button android1:layout_weight="1" android1:layout_height="wrap_content" android1:id="@+id/button2" android1:onClick="Connect" android1:layout_width="wrap_content" android1:text="@string/connect"></Button>
-    </LinearLayout>
-    <TextView android1:id="@+id/textView3" android1:text="@string/dataRecieved" android1:layout_width="wrap_content" android1:layout_height="wrap_content"></TextView>
-    <EditText android:layout_width="match_parent" android:id="@+id/ETReceived" android1:height="200px" android1:layout_height="wrap_content" android1:inputType="textMultiLine" android1:isScrollContainer="true"></EditText>
-    <TextView android:layout_height="wrap_content" android:text="@string/dataToSend" android:layout_width="wrap_content" android:id="@+id/textView2"></TextView>
-    <EditText android:layout_height="wrap_content" android:layout_width="match_parent" android:id="@+id/ETSend"></EditText>
-    <Button android:layout_height="wrap_content" android:id="@+id/button1" android:onClick="Send" android:layout_width="wrap_content" android1:text="@string/btnSend"></Button>
-    </LinearLayout>
+    android:weightSum="1">
+    <ScrollView 
+        android:id="@+id/scroll" 
+        android:layout_width="fill_parent"
+    	android:layout_height="wrap_content">
+	    <LinearLayout 
+	        android:id="@+id/container"
+	        android:orientation="vertical" 
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content">
+	        <LinearLayout 
+	            android:layout_width="match_parent" 
+	            android:layout_height="wrap_content" 
+	            android:id="@+id/LinearLayout1" 
+	            android:orientation="horizontal">
+	            <TextView 
+	                android:id="@+id/textView4" 
+	                android:text="@string/serverip" 
+	                android:layout_width="wrap_content" 
+	                android:layout_height="wrap_content"/>
+	            <EditText 
+	                android:layout_width="match_parent" 
+	                android:layout_height="wrap_content" 
+	                android:id="@+id/ETServerIP"/>
+	        </LinearLayout>
+		    <LinearLayout 
+		        android:layout_height="wrap_content" 
+		        android:id="@+id/linearLayout1" 
+		        android:layout_width="match_parent">
+		        <TextView 
+		            android:layout_height="wrap_content" 
+		            android:text="Username:" 
+		            android:layout_width="wrap_content" 
+		            android:id="@+id/textView1" 
+		            android:layout_weight="1"/>
+		        <EditText 
+		            android:layout_height="wrap_content" 
+		            android:inputType="textPersonName" 
+		            android:id="@+id/ETUserName" 
+		            android:layout_width="173dp" 
+		            android:layout_weight="1"/>
+		        <Button 
+		            android:layout_weight="1" 
+		            android:layout_height="wrap_content" 
+		            android:id="@+id/button2" 
+		            android:onClick="Connect" 
+		            android:layout_width="wrap_content" 
+		            android:text="@string/connect"/>
+		    </LinearLayout>
+		    <TextView 
+		        android:id="@+id/textView3" 
+		        android:text="@string/dataRecieved" 
+		        android:layout_width="wrap_content" 
+		        android:layout_height="wrap_content"/>
+		    <EditText 
+		        android:layout_width="match_parent" 
+		        android:id="@+id/ETReceived" 
+		        android:height="200px" 
+		        android:layout_height="wrap_content" 
+		        android:inputType="textMultiLine" 
+		        android:isScrollContainer="true"/>
+		    <TextView 
+		        android:layout_height="wrap_content" 
+		        android:text="@string/dataToSend" 
+		        android:layout_width="wrap_content" 
+		        android:id="@+id/textView2"/>
+		    <EditText 
+		        android:layout_height="wrap_content" 
+		        android:layout_width="match_parent" 
+		        android:id="@+id/ETSend"/>
+		    <Button 
+		        android:layout_height="wrap_content" 
+		        android:id="@+id/button1" 
+		        android:onClick="Send" 
+		        android:layout_width="wrap_content" 
+		        android:text="@string/btnSend"/>
+	    </LinearLayout>
     </ScrollView>
 </LinearLayout>
