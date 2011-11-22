@@ -1,27 +1,58 @@
 package iglugis.chatter;
 
+import java.util.ArrayList;
+
 import android.app.Activity;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TextView;
 
 public class ChatterActivity extends Activity {
 	private Client client;
 	private final String SHARED = "sharedchatterpref";
 	private String mUserName;
 	private String mIpAddress;
+	private ListView mList;
+	private LayoutInflater mLayoutInflater;
+	private CustomAdapter mAdapter;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
  
         setContentView(R.layout.main);
+        mLayoutInflater = getLayoutInflater();
+        // Set up list
+ 		mList = (ListView) findViewById(R.id.chat_view);
+// 		mList.setOnItemClickListener(this);
+ 		
+ 		
+ 		ArrayList<ChatMessage> testList = new ArrayList<ChatMessage>();
+ 		ChatMessage msg = new ChatMessage();
+ 		msg.message = "TESTTESTTEST";
+ 		testList.add(msg);
+ 		testList.add(msg);
+ 		testList.add(msg);
+ 		testList.add(msg);
+ 		testList.add(msg);
+ 		
+ 		mAdapter = new CustomAdapter(this, R.layout.row, testList);
+ 		mList.setAdapter(mAdapter);
+ 		
+		mAdapter.setList(testList);
         
         EditText textUser = (EditText)findViewById(R.id.ETUserName);
         EditText serverIP = (EditText)findViewById(R.id.ETServerIP);
@@ -87,24 +118,77 @@ public class ChatterActivity extends Activity {
    	 
     	public void handleMessage(Message msg) {
     		if (msg.what == 0) {
-    			EditText text = (EditText) findViewById(R.id.ETReceived);
-    			text.append((String)msg.obj + "\n" );
+    			addMessage((String) msg.obj);
     		}
     	}
     };
+    
+    public void addMessage(String message) {
+    	ChatMessage chatMessage = new ChatMessage();
+    	chatMessage.message = message;
+		mAdapter.add(chatMessage);
+		mAdapter.notifyDataSetChanged();
+    }
     
     public void Connect(View view) {
     	client = new Client(mIpAddress, mUserName, handlerClient);
     	client.Start();
     	Button sendBtn = (Button) findViewById(R.id.button1);
     	sendBtn.setEnabled(true);
-    	
     }
     
     public void Send(View view) {
     	EditText edit = (EditText) findViewById(R.id.ETSend);
     	String msg = edit.getText().toString();
+    	addMessage("You: " + msg);
     	client.SendMessage(msg);
     	edit.setText("");
     }
+    
+	public class CustomAdapter extends ArrayAdapter<ChatMessage> {
+		
+		private ArrayList<ChatMessage> mListItems;
+		
+		public CustomAdapter (Context context, int textViewResourceId, ArrayList<ChatMessage> list) {
+			super(context, textViewResourceId, list);
+		}
+		
+		public void setList(ArrayList<ChatMessage> list) {
+			this.clear();
+			for(ChatMessage item : list) {
+				this.add(item);
+			}
+			mListItems = list;
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			ViewHolder holder;
+	        if (convertView == null) {
+	        	convertView = mLayoutInflater.inflate(R.layout.row, parent, false);
+	            
+	            holder = new ViewHolder();
+	            
+	            holder.text = (TextView) convertView.findViewById(R.id.row_txt);
+	            holder.image = (ImageView) convertView.findViewById(R.id.image);
+	            
+	            convertView.setTag(holder);
+	        } else {
+	        	holder = (ViewHolder) convertView.getTag();
+	        }
+	        
+	        ChatMessage chatMessage = mListItems.get(position);
+            if (chatMessage != null) {
+	    		holder.text.setText(chatMessage.message);
+	    		
+	    		holder.image.setImageResource(R.drawable.icon);	//Here we can use some custom graphic for each user
+            }
+            return convertView;
+		}
+	}
+	
+	private static class ViewHolder {
+		TextView text;
+		ImageView image;
+	}
 }
