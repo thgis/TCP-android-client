@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import com.google.gson;
 
 import android.os.Handler;
 import android.os.Message;
@@ -14,9 +15,14 @@ public class Client implements Runnable {
 	private byte[] buffer;
 	private String Name;
 	private Handler handle;
+	private String ipadresse;
+	enum RECEIVESTATE {WAITING, RECEIVING,ENDING};
 	
 	OutputStream outStream;
 	InputStream instream;
+	
+	private String inputBuffer;
+	private RECEIVESTATE receiveState;
 	
 	private volatile boolean stop = false;
 	
@@ -25,17 +31,19 @@ public class Client implements Runnable {
 		this.handle = handle;
 		Name = name;
 		buffer = new byte[1024];
+		this.ipadresse = ipAddress;
+		this.receiveState = RECEIVESTATE.WAITING;
+	}
+	
+	public void connect()
+	{
 		try {
 			kkSocket = new Socket(ipAddress , 8000);
 			outStream = kkSocket.getOutputStream();
 			instream = kkSocket.getInputStream();
-			SendMessage("User:" + Name);
 		} catch (UnknownHostException e) {
-			
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -49,17 +57,49 @@ public class Client implements Runnable {
 	        {
 	        	 instream.read(buffer, 0, bytes);
 	        	 String test = new String(buffer,0,bytes);
-	 	    
-	        	 Message lmsg = new Message();
-	 	         lmsg.what = 0;
-	 	         lmsg.obj = test;
-	 	         handle.sendMessage(lmsg);
 	        }
 	        
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+    }
+    
+    private void handleData(String data)
+    {
+    	for (char c : data.toCharArray()) 
+    	{
+			switch (this.receiveState) {
+			case WAITING:
+				if (c == 0x02)
+				{
+					this.receiveState=RECEIVESTATE.RECEIVING;
+					this.inputBuffer="";
+				}
+				break;
+			case RECEIVING:
+				this.inputBuffer = this.inputBuffer + c;
+				if (c==0x10)
+					this.receiveState=RECEIVESTATE.ENDING;
+				break;
+
+			case ENDING:
+				if (c==0x03)
+				{	
+					String completeMessage= this.inputBuffer;
+					handleMessage(completeMessage);
+				}
+				this.receiveState=RECEIVESTATE.WAITING;
+				break;
+
+			default:
+				break;
+			}
+		}
+    }
+    
+    private void handleMessage(String message)
+    {
     }
     
     public void SendMessage(String msg)
