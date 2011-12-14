@@ -1,5 +1,6 @@
 package iglugis.chatter;
 
+import java.security.PublicKey;
 import java.util.ArrayList;
 
 import android.app.Activity;
@@ -120,6 +121,10 @@ public class ChatterActivity extends Activity {
     		if (msg.what == 0) {
     			addMessage((String) msg.obj);
     		}
+    		if (msg.what==MessageTypes.PUBLISHMESSAGE)
+    		{
+    			addMessage(((PublishMessage)msg.obj).Message);
+    		}
     	}
     };
     
@@ -132,7 +137,9 @@ public class ChatterActivity extends Activity {
     
     public void Connect(View view) {
     	client = new Client(mIpAddress, mUserName, handlerClient);
+    	client.connect();
     	client.Start();
+    	client.sendUserLogon();
     	Button sendBtn = (Button) findViewById(R.id.button1);
     	sendBtn.setEnabled(true);
     }

@@ -5,10 +5,16 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import com.google.gson;
+import java.security.PublicKey;
+
+import com.google.gson.*;
+import org.json.*;
 
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
+
+import iglugis.chatter.MessageTypes;
 
 public class Client implements Runnable {
 	private Socket kkSocket;
@@ -38,7 +44,7 @@ public class Client implements Runnable {
 	public void connect()
 	{
 		try {
-			kkSocket = new Socket(ipAddress , 8000);
+			kkSocket = new Socket(this.ipadresse , 8000);
 			outStream = kkSocket.getOutputStream();
 			instream = kkSocket.getInputStream();
 		} catch (UnknownHostException e) {
@@ -46,6 +52,15 @@ public class Client implements Runnable {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void sendUserLogon()
+	{
+		UserLogon user = new UserLogon();
+		user.username=Name;
+		Gson gson = new Gson();
+		String message = gson.toJson(user);
+		SendMessage(message);
 	}
 	
     public void Read()
@@ -56,7 +71,8 @@ public class Client implements Runnable {
 	        if( bytes > 0 )
 	        {
 	        	 instream.read(buffer, 0, bytes);
-	        	 String test = new String(buffer,0,bytes);
+	        	 String data = new String(buffer,0,bytes);
+	        	 handleData(data);
 	        }
 	        
 		} catch (IOException e) {
@@ -78,9 +94,10 @@ public class Client implements Runnable {
 				}
 				break;
 			case RECEIVING:
-				this.inputBuffer = this.inputBuffer + c;
 				if (c==0x10)
 					this.receiveState=RECEIVESTATE.ENDING;
+				else
+					this.inputBuffer = this.inputBuffer + c;
 				break;
 
 			case ENDING:
@@ -100,6 +117,36 @@ public class Client implements Runnable {
     
     private void handleMessage(String message)
     {
+    	int id=0;
+		try {
+			id = Integer.parseInt(new JSONObject(message).get("Id").toString());
+		} catch (NumberFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	switch (id) 
+    	{
+		case MessageTypes.USERLOGON:
+			Log.d("handleMessage", "USERLOGON");
+			//TODO do something with the message
+			break;
+		case MessageTypes.PUBLISHMESSAGE:
+			Log.d("handleMessage", "PUBLISHMESSAGE");
+			//TODO do something with the message
+			PublishMessage pubMessage = new Gson().fromJson(message, PublishMessage.class);
+			Message mess = new Message();
+			mess.what=MessageTypes.PUBLISHMESSAGE;
+			mess.obj = pubMessage;
+			handle.sendMessage(mess);
+			break;
+
+		default:
+			break;
+		}
+    	
     }
     
     public void SendMessage(String msg)
@@ -153,4 +200,9 @@ public class Client implements Runnable {
     {
     	stop = true;
     }
+}
+
+class TypeContainer
+{
+	public int id;
 }
