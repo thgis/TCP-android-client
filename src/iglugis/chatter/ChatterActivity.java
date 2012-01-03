@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,32 +34,16 @@ public class ChatterActivity extends Activity {
 	private ListView mList;
 	private LayoutInflater mLayoutInflater;
 	private CustomAdapter mAdapter;
+	private int mCurrentView = 0;
+	private View mSetupView;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
- 
-        setContentView(R.layout.main);
         mLayoutInflater = getLayoutInflater();
-        // Set up list
- 		mList = (ListView) findViewById(R.id.chat_view);
-// 		mList.setOnItemClickListener(this);
+        mSetupView = mLayoutInflater.inflate(R.layout.setup_display, null);
+        setContentView(mSetupView);
  		
- 		
- 		ArrayList<ChatMessage> testList = new ArrayList<ChatMessage>();
- 		ChatMessage msg = new ChatMessage();
- 		msg.message = "TESTTESTTEST";
- 		testList.add(msg);
- 		testList.add(msg);
- 		testList.add(msg);
- 		testList.add(msg);
- 		testList.add(msg);
- 		
- 		mAdapter = new CustomAdapter(this, R.layout.row, testList);
- 		mList.setAdapter(mAdapter);
- 		
-		mAdapter.setList(testList);
-        
         EditText textUser = (EditText)findViewById(R.id.ETUserName);
         EditText serverIP = (EditText)findViewById(R.id.ETServerIP);
         
@@ -150,6 +135,15 @@ public class ChatterActivity extends Activity {
     	client.connect();
     	client.Start();
     	client.sendUserLogon();
+    	setContentView(R.layout.chat_display);
+    	mCurrentView = 1;
+    	
+    	mList = (ListView) this.findViewById(R.id.list_chat_view);
+    	
+ 		ArrayList<ChatMessage> list = new ArrayList<ChatMessage>();
+ 		mAdapter = new CustomAdapter(this, R.layout.row, list);
+ 		mList.setAdapter(mAdapter);
+    	
     	Button sendBtn = (Button) findViewById(R.id.button1);
     	sendBtn.setEnabled(true);
     	GetOnlineUserList userList = new GetOnlineUserList();
@@ -170,12 +164,25 @@ public class ChatterActivity extends Activity {
     	edit.setText("");
     }
     
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
+        	if(mCurrentView != 0) {
+        		mCurrentView = 0;
+        		setContentView(mSetupView);
+        		return true;
+        	}
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
 	public class CustomAdapter extends ArrayAdapter<ChatMessage> {
 		
 		private ArrayList<ChatMessage> mListItems;
 		
 		public CustomAdapter (Context context, int textViewResourceId, ArrayList<ChatMessage> list) {
 			super(context, textViewResourceId, list);
+			mListItems = list;
 		}
 		
 		public void setList(ArrayList<ChatMessage> list) {
@@ -201,13 +208,14 @@ public class ChatterActivity extends Activity {
 	        } else {
 	        	holder = (ViewHolder) convertView.getTag();
 	        }
-	        
-	        ChatMessage chatMessage = mListItems.get(position);
-            if (chatMessage != null) {
-	    		holder.text.setText(chatMessage.message);
-	    		
-	    		holder.image.setImageResource(R.drawable.icon);	//Here we can use some custom graphic for each user
-            }
+	        if(!mListItems.isEmpty()) {
+	        	ChatMessage chatMessage = mListItems.get(position);
+	        	if (chatMessage != null) {
+	        		holder.text.setText(chatMessage.message);
+	        		
+	        		holder.image.setImageResource(R.drawable.icon);	//Here we can use some custom graphic for each user
+	        	}
+	        }
             return convertView;
 		}
 	}
