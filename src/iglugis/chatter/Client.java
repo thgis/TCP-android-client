@@ -15,6 +15,7 @@ import android.os.Message;
 import android.util.Log;
 
 import iglugis.chatter.MessageTypes;
+import iglugis.chatter.MessageStructures.GetOnlineUserList;
 
 public class Client implements Runnable {
 	private Socket kkSocket;
@@ -127,6 +128,7 @@ public class Client implements Runnable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		Message mess = new Message();
     	switch (id) 
     	{
 		case MessageTypes.USERLOGON:
@@ -137,12 +139,17 @@ public class Client implements Runnable {
 			Log.d("handleMessage", "PUBLISHMESSAGE");
 			//TODO do something with the message
 			PublishMessage pubMessage = new Gson().fromJson(message, PublishMessage.class);
-			Message mess = new Message();
 			mess.what=MessageTypes.PUBLISHMESSAGE;
 			mess.obj = pubMessage;
 			handle.sendMessage(mess);
 			break;
-
+		case MessageTypes.GETONLINEUSERLIST:
+			Log.d("handleMessage","GETONLINEUSERLIST");
+			GetOnlineUserList userList= new Gson().fromJson(message, GetOnlineUserList.class);
+			mess.what=MessageTypes.GETONLINEUSERLIST;
+			mess.obj = userList;
+			handle.sendMessage(mess);
+			break;
 		default:
 			break;
 		}

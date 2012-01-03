@@ -1,5 +1,7 @@
 package iglugis.chatter;
 
+import iglugis.chatter.MessageStructures.GetOnlineUserList;
+
 import java.security.PublicKey;
 import java.util.ArrayList;
 
@@ -120,12 +122,18 @@ public class ChatterActivity extends Activity {
     private Handler handlerClient = new Handler() {
    	 
     	public void handleMessage(Message msg) {
-    		if (msg.what == 0) {
-    			addMessage((String) msg.obj);
-    		}
-    		if (msg.what==MessageTypes.PUBLISHMESSAGE)
-    		{
-    			addMessage(((PublishMessage)msg.obj).message);
+    		switch (msg.what) {
+			case MessageTypes.USERLOGON:
+				addMessage("Logged on succesful");
+				break;
+			case MessageTypes.PUBLISHMESSAGE:
+				addMessage((String) msg.obj);
+				break;
+			case MessageTypes.GETONLINEUSERLIST:
+				//TODO update list of online users
+				break;
+			default:
+				break;
     		}
     	}
     };
@@ -144,6 +152,8 @@ public class ChatterActivity extends Activity {
     	client.sendUserLogon();
     	Button sendBtn = (Button) findViewById(R.id.button1);
     	sendBtn.setEnabled(true);
+    	GetOnlineUserList userList = new GetOnlineUserList();
+    	client.SendMessage(new Gson().toJson(userList));
     }
     
     public void Send(View view) {

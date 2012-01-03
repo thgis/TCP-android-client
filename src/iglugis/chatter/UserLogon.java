@@ -6,6 +6,7 @@ public class UserLogon {
 	public String username;
 	public boolean success;
 	public String errormessage;
+	public int id;
 	
 	public UserLogon()
 	{
