@@ -20,6 +20,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import com.google.gson.*;
+import org.json.*;
 
 public class ChatterActivity extends Activity {
 	private Client client;
@@ -145,7 +147,9 @@ public class ChatterActivity extends Activity {
     	message.message=msg;
     	message.receiver="all";
     	message.sender=mUserName;
-    	client.SendMessage(msg);
+    	Gson gson = new Gson();
+    	String serializedMessage = gson.toJson(message);
+    	client.SendMessage(serializedMessage);
     	edit.setText("");
     }
     
