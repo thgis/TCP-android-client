@@ -5,16 +5,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.security.PublicKey;
 
-import com.google.gson.*;
-import org.json.*;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
-import iglugis.chatter.MessageTypes;
+import com.google.gson.Gson;
 
 public class Client implements Runnable {
 	private Socket kkSocket;

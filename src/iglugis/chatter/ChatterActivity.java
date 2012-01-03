@@ -1,6 +1,5 @@
 package iglugis.chatter;
 
-import java.security.PublicKey;
 import java.util.ArrayList;
 
 import android.app.Activity;
@@ -34,26 +33,19 @@ public class ChatterActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
  
-        setContentView(R.layout.main);
+        setContentView(R.layout.setup_display);
         mLayoutInflater = getLayoutInflater();
-        // Set up list
- 		mList = (ListView) findViewById(R.id.chat_view);
-// 		mList.setOnItemClickListener(this);
  		
- 		
- 		ArrayList<ChatMessage> testList = new ArrayList<ChatMessage>();
- 		ChatMessage msg = new ChatMessage();
- 		msg.message = "TESTTESTTEST";
- 		testList.add(msg);
- 		testList.add(msg);
- 		testList.add(msg);
- 		testList.add(msg);
- 		testList.add(msg);
- 		
- 		mAdapter = new CustomAdapter(this, R.layout.row, testList);
- 		mList.setAdapter(mAdapter);
- 		
-		mAdapter.setList(testList);
+// 		ChatMessage msg = new ChatMessage();
+// 		msg.message = "TESTTESTTEST";
+// 		testList.add(msg);
+// 		testList.add(msg);
+// 		testList.add(msg);
+// 		testList.add(msg);
+// 		testList.add(msg);
+// 		
+// 		
+//		mAdapter.setList(list);
         
         EditText textUser = (EditText)findViewById(R.id.ETUserName);
         EditText serverIP = (EditText)findViewById(R.id.ETServerIP);
@@ -140,6 +132,14 @@ public class ChatterActivity extends Activity {
     	client.connect();
     	client.Start();
     	client.sendUserLogon();
+    	setContentView(R.layout.chat_display);
+    	
+    	mList = (ListView) this.findViewById(R.id.list_chat_view);
+    	
+ 		ArrayList<ChatMessage> list = new ArrayList<ChatMessage>();
+ 		mAdapter = new CustomAdapter(this, R.layout.row, list);
+ 		mList.setAdapter(mAdapter);
+    	
     	Button sendBtn = (Button) findViewById(R.id.button1);
     	sendBtn.setEnabled(true);
     }
@@ -183,13 +183,14 @@ public class ChatterActivity extends Activity {
 	        } else {
 	        	holder = (ViewHolder) convertView.getTag();
 	        }
-	        
-	        ChatMessage chatMessage = mListItems.get(position);
-            if (chatMessage != null) {
-	    		holder.text.setText(chatMessage.message);
-	    		
-	    		holder.image.setImageResource(R.drawable.icon);	//Here we can use some custom graphic for each user
-            }
+	        if(!mListItems.isEmpty()) {
+	        	ChatMessage chatMessage = mListItems.get(position);
+	        	if (chatMessage != null) {
+	        		holder.text.setText(chatMessage.message);
+	        		
+	        		holder.image.setImageResource(R.drawable.icon);	//Here we can use some custom graphic for each user
+	        	}
+	        }
             return convertView;
 		}
 	}
