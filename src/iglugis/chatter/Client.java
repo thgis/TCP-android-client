@@ -119,7 +119,7 @@ public class Client implements Runnable {
     {
     	int id=0;
 		try {
-			id = Integer.parseInt(new JSONObject(message).get("Id").toString());
+			id = Integer.parseInt(new JSONObject(message).get("type").toString());
 		} catch (NumberFormatException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
