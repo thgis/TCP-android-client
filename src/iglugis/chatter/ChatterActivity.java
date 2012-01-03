@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,25 +29,16 @@ public class ChatterActivity extends Activity {
 	private ListView mList;
 	private LayoutInflater mLayoutInflater;
 	private CustomAdapter mAdapter;
+	private int mCurrentView = 0;
+	private View mSetupView;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
- 
-        setContentView(R.layout.setup_display);
         mLayoutInflater = getLayoutInflater();
+        mSetupView = mLayoutInflater.inflate(R.layout.setup_display, null);
+        setContentView(mSetupView);
  		
-// 		ChatMessage msg = new ChatMessage();
-// 		msg.message = "TESTTESTTEST";
-// 		testList.add(msg);
-// 		testList.add(msg);
-// 		testList.add(msg);
-// 		testList.add(msg);
-// 		testList.add(msg);
-// 		
-// 		
-//		mAdapter.setList(list);
-        
         EditText textUser = (EditText)findViewById(R.id.ETUserName);
         EditText serverIP = (EditText)findViewById(R.id.ETServerIP);
         
@@ -133,6 +125,7 @@ public class ChatterActivity extends Activity {
     	client.Start();
     	client.sendUserLogon();
     	setContentView(R.layout.chat_display);
+    	mCurrentView = 1;
     	
     	mList = (ListView) this.findViewById(R.id.list_chat_view);
     	
@@ -156,12 +149,25 @@ public class ChatterActivity extends Activity {
     	edit.setText("");
     }
     
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
+        	if(mCurrentView != 0) {
+        		mCurrentView = 0;
+        		setContentView(mSetupView);
+        		return true;
+        	}
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
 	public class CustomAdapter extends ArrayAdapter<ChatMessage> {
 		
 		private ArrayList<ChatMessage> mListItems;
 		
 		public CustomAdapter (Context context, int textViewResourceId, ArrayList<ChatMessage> list) {
 			super(context, textViewResourceId, list);
+			mListItems = list;
 		}
 		
 		public void setList(ArrayList<ChatMessage> list) {
