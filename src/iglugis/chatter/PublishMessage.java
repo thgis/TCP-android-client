@@ -1,14 +1,14 @@
 package iglugis.chatter;
 
 public class PublishMessage {
-	public int id;
-	public String Sender;
-	public String Receiver;
-	public String Message;
-	public String ErrorMessage;
+	public int type;
+	public String sender;
+	public String receiver;
+	public String message;
+	public String errorMessage;
 	
 	public PublishMessage()
 	{
-		id=MessageTypes.PUBLISHMESSAGE;
+		type=MessageTypes.PUBLISHMESSAGE;
 	}
 }

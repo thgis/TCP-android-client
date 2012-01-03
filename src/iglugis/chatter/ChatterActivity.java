@@ -115,7 +115,7 @@ public class ChatterActivity extends Activity {
     		}
     		if (msg.what==MessageTypes.PUBLISHMESSAGE)
     		{
-    			addMessage(((PublishMessage)msg.obj).Message);
+    			addMessage(((PublishMessage)msg.obj).message);
     		}
     	}
     };
@@ -148,6 +148,10 @@ public class ChatterActivity extends Activity {
     	EditText edit = (EditText) findViewById(R.id.ETSend);
     	String msg = edit.getText().toString();
     	addMessage("You: " + msg);
+    	PublishMessage message = new PublishMessage();
+    	message.message=msg;
+    	message.receiver="all";
+    	message.sender=mUserName;
     	client.SendMessage(msg);
     	edit.setText("");
     }
