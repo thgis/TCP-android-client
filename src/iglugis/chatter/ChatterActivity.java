@@ -17,14 +17,15 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import com.google.gson.*;
-import org.json.*;
+
+import com.google.gson.Gson;
 
 public class ChatterActivity extends Activity {
 	private Client client;
@@ -138,19 +139,37 @@ public class ChatterActivity extends Activity {
     	setContentView(R.layout.chat_display);
     	mCurrentView = 1;
     	
+    	//setup the list
     	mList = (ListView) this.findViewById(R.id.list_chat_view);
     	
  		ArrayList<ChatMessage> list = new ArrayList<ChatMessage>();
  		mAdapter = new CustomAdapter(this, R.layout.row, list);
  		mList.setAdapter(mAdapter);
+ 		mList.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
     	
     	Button sendBtn = (Button) findViewById(R.id.button1);
     	sendBtn.setEnabled(true);
     	GetOnlineUserList userList = new GetOnlineUserList();
     	client.SendMessage(new Gson().toJson(userList));
+    	
+    	EditText edit = (EditText) findViewById(R.id.ETSend);
+    	
+    	TextView.OnEditorActionListener exampleListener = new TextView.OnEditorActionListener(){
+    		public boolean onEditorAction(TextView exampleView, int actionId, KeyEvent event) {
+    		    if (event.getAction() != KeyEvent.ACTION_DOWN) {
+    		    	return false;
+    		    }
+    		    if(actionId == EditorInfo.IME_NULL){
+    		    	sendMessage();//match this behavior to your 'Send' (or Confirm) button
+    		    }
+
+    		    return true;
+    		}
+    	};
+    	edit.setOnEditorActionListener(exampleListener);
     }
     
-    public void Send(View view) {
+    public void sendMessage() {
     	EditText edit = (EditText) findViewById(R.id.ETSend);
     	String msg = edit.getText().toString();
     	addMessage("You: " + msg);
@@ -162,6 +181,10 @@ public class ChatterActivity extends Activity {
     	String serializedMessage = gson.toJson(message);
     	client.SendMessage(serializedMessage);
     	edit.setText("");
+    }
+    
+    public void Send(View view) {
+    	sendMessage();
     }
     
     @Override
