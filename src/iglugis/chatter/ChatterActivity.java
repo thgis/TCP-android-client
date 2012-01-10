@@ -41,7 +41,7 @@ public class ChatterActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        thomases tilføjelse
+
         mLayoutInflater = getLayoutInflater();
         mSetupView = mLayoutInflater.inflate(R.layout.setup_display, null);
         setContentView(mSetupView);
