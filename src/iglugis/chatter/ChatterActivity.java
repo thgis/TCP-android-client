@@ -2,7 +2,10 @@ package iglugis.chatter;
 
 import iglugis.chatter.MessageStructures.GetOnlineUserList;
 
+import java.lang.Character.UnicodeBlock;
 import java.security.PublicKey;
+import java.sql.Time;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import android.app.Activity;
@@ -13,6 +16,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.text.format.DateFormat;
+import android.util.TimeFormatException;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,6 +42,8 @@ public class ChatterActivity extends Activity {
 	private CustomAdapter mAdapter;
 	private int mCurrentView = 0;
 	private View mSetupView;
+	public long timestamp = 0;
+	private final static String TIMESTAMP = "timestamp";
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -53,7 +60,8 @@ public class ChatterActivity extends Activity {
         SharedPreferences settings = getSharedPreferences(SHARED, 0);
         mUserName = settings.getString("userName", "your name");
         mIpAddress = settings.getString("ipAddress", "0.0.0.0");
-
+        timestamp = settings.getLong(TIMESTAMP, 0);
+        
         serverIP.setText(mIpAddress);
         textUser.setText(mUserName);
         
@@ -99,6 +107,7 @@ public class ChatterActivity extends Activity {
         SharedPreferences.Editor editor = settings.edit();
         editor.putString("userName", mUserName);
         editor.putString("ipAddress", mIpAddress);
+        editor.putLong(TIMESTAMP, timestamp);
 
         // Commit the edits!
         editor.commit();
@@ -114,7 +123,10 @@ public class ChatterActivity extends Activity {
 				addMessage("Logged on succesful");
 				break;
 			case MessageTypes.PUBLISHMESSAGE:
-				addMessage((String) msg.obj);
+				Time time = new Time(((PublishMessage) msg.obj).timeStamp);
+				SimpleDateFormat sdf = new SimpleDateFormat("yy");
+				String strTime=sdf.format(time);
+				addMessage(strTime + ((PublishMessage) msg.obj).message);
 				break;
 			case MessageTypes.GETONLINEUSERLIST:
 				//TODO update list of online users
