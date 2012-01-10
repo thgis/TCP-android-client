@@ -130,6 +130,8 @@ public class ChatterActivity extends Activity {
 				break;
 			case MessageTypes.GETONLINEUSERLIST:
 				//TODO update list of online users
+				GetOnlineUserList userlist = (GetOnlineUserList) msg.obj;
+				String[] list = userlist.userList;
 				break;
 			default:
 				break;
