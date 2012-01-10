@@ -6,6 +6,7 @@ public class PublishMessage {
 	public String receiver;
 	public String message;
 	public String errorMessage;
+	public long timeStamp=0;
 	
 	public PublishMessage()
 	{
