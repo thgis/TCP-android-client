@@ -127,7 +127,11 @@ public class ChatterActivity extends Activity {
 				Time time = new Time(((PublishMessage) msg.obj).timeStamp);
 				SimpleDateFormat sdf = new SimpleDateFormat("MM-dd HH:mm:ss: ");
 				String strTime=sdf.format(time);
-				addMessage(strTime + ((PublishMessage) msg.obj).sender + "\n" + ((PublishMessage) msg.obj).message);
+				String name = "you";
+				// see if you are the sender
+				if (!((PublishMessage) msg.obj).sender.equalsIgnoreCase(mUserName))
+					name = ((PublishMessage) msg.obj).sender;
+				addMessage(strTime + name + "\n" + ((PublishMessage) msg.obj).message);
 				break;
 			case MessageTypes.GETONLINEUSERLIST:
 				//TODO update list of online users
@@ -188,7 +192,7 @@ public class ChatterActivity extends Activity {
     public void sendMessage() {
     	EditText edit = (EditText) findViewById(R.id.ETSend);
     	String msg = edit.getText().toString();
-    	addMessage("You: " + msg);
+    	//addMessage("You: " + msg);
     	SendMessage message = new SendMessage();
     	message.message=msg;
     	message.receiver="all";
