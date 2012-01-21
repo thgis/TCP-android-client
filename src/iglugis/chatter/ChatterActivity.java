@@ -15,6 +15,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Vibrator;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
@@ -119,6 +120,7 @@ public class ChatterActivity extends Activity {
     private Handler handlerClient = new Handler() {
    	 
     	public void handleMessage(Message msg) {
+    		boolean vibrate=true;
     		switch (msg.what) {
 			case MessageTypes.USERLOGON:
 				addMessage("Logged on succesful");
@@ -132,6 +134,7 @@ public class ChatterActivity extends Activity {
 				if (!((PublishMessage) msg.obj).sender.equalsIgnoreCase(mUserName))
 					name = ((PublishMessage) msg.obj).sender;
 				addMessage(strTime + name + "\n" + ((PublishMessage) msg.obj).message);
+				timestamp = ((PublishMessage) msg.obj).timeStamp;
 				break;
 			case MessageTypes.GETONLINEUSERLIST:
 				//TODO update list of online users
@@ -139,8 +142,11 @@ public class ChatterActivity extends Activity {
 				String[] list = userlist.userList;
 				break;
 			default:
+				vibrate=false;
 				break;
     		}
+    		if (vibrate)
+    			((Vibrator)getSystemService(VIBRATOR_SERVICE)).vibrate(300);
     	}
     };
     
@@ -187,6 +193,10 @@ public class ChatterActivity extends Activity {
     		}
     	};
     	edit.setOnEditorActionListener(exampleListener);
+    	
+    	// inform server to send messages earlier than <timestamp>
+    	if (timestamp!=0)
+    		client.getNewMessages(timestamp);
     }
     
     public void sendMessage() {

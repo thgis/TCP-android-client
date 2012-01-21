@@ -15,6 +15,7 @@ import android.util.Log;
 
 
 import iglugis.chatter.MessageTypes;
+import iglugis.chatter.MessageStructures.GetNewMessages;
 import iglugis.chatter.MessageStructures.GetOnlineUserList;
 
 import com.google.gson.Gson;
@@ -70,7 +71,6 @@ public class Client implements Runnable {
     public void Read()
     {
 		try {
-			
 	        int bytes = instream.available();
 	        if( bytes > 0 )
 	        {
@@ -89,7 +89,7 @@ public class Client implements Runnable {
     {
     	for (char c : data.toCharArray()) 
     	{
-			switch (this.receiveState) {
+			switch (this.receiveState) {				
 			case WAITING:
 				if (c == 0x02)
 				{
@@ -174,6 +174,14 @@ public class Client implements Runnable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+    }
+    
+    public void getNewMessages(long lastTimestamp)
+    {
+    	GetNewMessages msg = new GetNewMessages();
+    	msg.receiver="all";
+    	msg.lastSeenTimeStamp=lastTimestamp;
+    	SendMessage(new Gson().toJson(msg));
     }
     
     public synchronized void Start()
