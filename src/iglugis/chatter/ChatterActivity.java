@@ -3,8 +3,6 @@ package iglugis.chatter;
 import iglugis.chatter.MessageStructures.GetOnlineUserList;
 import iglugis.chatter.MessageStructures.SendMessage;
 
-import java.lang.Character.UnicodeBlock;
-import java.security.PublicKey;
 import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -12,14 +10,13 @@ import java.util.ArrayList;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.text.format.DateFormat;
-import android.util.TimeFormatException;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,16 +39,77 @@ public class ChatterActivity extends Activity {
 	private ListView mList;
 	private LayoutInflater mLayoutInflater;
 	private CustomAdapter mAdapter;
-	private int mCurrentView = 0;
+	private int mCurrentView;
 	private View mSetupView;
 	public long timestamp = 0;
+	private ArrayList<ChatMessage> mMessageList;
 	private final static String TIMESTAMP = "timestamp";
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        mMessageList = new ArrayList<ChatMessage>();
         mLayoutInflater = getLayoutInflater();
+        mCurrentView = 0;
+        if(savedInstanceState != null) {
+        	mCurrentView = savedInstanceState.getInt("currentView", 100);
+        }
+         
+        Client test = client;
+        if(mCurrentView == 1) {
+        	createChatterView();
+        } else {
+        	createSetupView();
+        }
+    }
+    
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if(mCurrentView == 1) {
+        	createChatterView();
+        } else {
+        	createSetupView();
+        }
+    }
+    
+    private void createChatterView() {
+    	setContentView(R.layout.chat_display);
+    	mCurrentView = 1;
+    	
+    	//setup the list
+    	mList = (ListView) this.findViewById(R.id.list_chat_view);
+    	
+ 		mAdapter = new CustomAdapter(this, R.layout.row, mMessageList);
+ 		mList.setAdapter(mAdapter);
+ 		mList.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+    	
+    	Button sendBtn = (Button) findViewById(R.id.button1);
+    	sendBtn.setEnabled(true);
+    	
+    	EditText edit = (EditText) findViewById(R.id.ETSend);
+    	
+    	TextView.OnEditorActionListener exampleListener = new TextView.OnEditorActionListener(){
+    		public boolean onEditorAction(TextView exampleView, int actionId, KeyEvent event) {
+    		    switch(actionId){
+    		    case EditorInfo.IME_NULL:
+        		    if (event.getAction() != KeyEvent.ACTION_DOWN) {
+        		    	return false;
+        		    }
+    		    	sendMessage();
+    		    	break;
+    		    case EditorInfo.IME_ACTION_DONE:
+    		    	sendMessage();
+    		    	break;
+    		    }
+    		    return true;
+    		}
+    	};
+    	edit.setOnEditorActionListener(exampleListener);
+    	edit.requestFocus();
+	}
+
+	private void createSetupView() {
         mSetupView = mLayoutInflater.inflate(R.layout.setup_display, null);
         setContentView(mSetupView);
  		
@@ -96,6 +154,12 @@ public class ChatterActivity extends Activity {
 					int after) {
 			} 
         });
+	}
+
+	@Override
+    protected void onSaveInstanceState (Bundle outState) {
+    	outState.putInt("currentView", mCurrentView);
+    	super.onSaveInstanceState(outState);
     }
     
     @Override
@@ -158,41 +222,14 @@ public class ChatterActivity extends Activity {
     }
     
     public void Connect(View view) {
+    	createChatterView();
     	client = new Client(mIpAddress, mUserName, handlerClient);
     	client.connect();
     	client.Start();
     	client.sendUserLogon();
-    	setContentView(R.layout.chat_display);
-    	mCurrentView = 1;
     	
-    	//setup the list
-    	mList = (ListView) this.findViewById(R.id.list_chat_view);
-    	
- 		ArrayList<ChatMessage> list = new ArrayList<ChatMessage>();
- 		mAdapter = new CustomAdapter(this, R.layout.row, list);
- 		mList.setAdapter(mAdapter);
- 		mList.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
-    	
-    	Button sendBtn = (Button) findViewById(R.id.button1);
-    	sendBtn.setEnabled(true);
     	GetOnlineUserList userList = new GetOnlineUserList();
     	client.SendMessage(new Gson().toJson(userList));
-    	
-    	EditText edit = (EditText) findViewById(R.id.ETSend);
-    	
-    	TextView.OnEditorActionListener exampleListener = new TextView.OnEditorActionListener(){
-    		public boolean onEditorAction(TextView exampleView, int actionId, KeyEvent event) {
-    		    if (event.getAction() != KeyEvent.ACTION_DOWN) {
-    		    	return false;
-    		    }
-    		    if(actionId == EditorInfo.IME_NULL){
-    		    	sendMessage();//match this behavior to your 'Send' (or Confirm) button
-    		    }
-
-    		    return true;
-    		}
-    	};
-    	edit.setOnEditorActionListener(exampleListener);
     	
     	// inform server to send messages earlier than <timestamp>
     	if (timestamp!=0)
