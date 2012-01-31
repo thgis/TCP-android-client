@@ -1,4 +1,4 @@
-package iglugis.chatter;
+package com.betterchat.www;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,10 +14,10 @@ import android.os.Message;
 import android.util.Log;
 
 
-import iglugis.chatter.MessageTypes;
-import iglugis.chatter.MessageStructures.GetNewMessages;
-import iglugis.chatter.MessageStructures.GetOnlineUserList;
 
+import com.betterchat.www.MessageTypes;
+import com.betterchat.www.MessageStructures.GetNewMessages;
+import com.betterchat.www.MessageStructures.GetOnlineUserList;
 import com.google.gson.Gson;
 
 
@@ -36,6 +36,7 @@ public class Client implements Runnable {
 	private RECEIVESTATE receiveState;
 	
 	private volatile boolean stop = false;
+	private boolean mIsPaused;
 	
 	public Client(String ipAddress, String name, Handler handle)
 	{
@@ -189,14 +190,25 @@ public class Client implements Runnable {
     	Thread listenThread = new Thread(this);
     	listenThread.start();
     }
+    
+    public void pauseUpdate() {
+    	mIsPaused = true;
+    }
+    
+    public void resumeUpdate(Handler handler) {
+    	handle = handler;
+    	mIsPaused = false;
+    }
 
 	@Override
 	public void run() {
 		while(!stop)
 		{
-			Read();
+			if(!mIsPaused) {
+				Read();
+			}
 			try {
-				Thread.sleep(100);
+				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -218,9 +230,4 @@ public class Client implements Runnable {
     {
     	stop = true;
     }
-}
-
-class TypeContainer
-{
-	public int id;
 }

@@ -1,5 +1,5 @@
-package iglugis.chatter;
-import iglugis.chatter.MessageTypes;
+package com.betterchat.www;
+import com.betterchat.www.MessageTypes;
 
 public class UserLogon {
 	public int type;

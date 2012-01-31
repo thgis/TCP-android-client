@@ -1,7 +1,4 @@
-package iglugis.chatter;
-
-import iglugis.chatter.MessageStructures.GetOnlineUserList;
-import iglugis.chatter.MessageStructures.SendMessage;
+package com.betterchat.www;
 
 import java.sql.Time;
 import java.text.SimpleDateFormat;
@@ -10,7 +7,6 @@ import java.util.ArrayList;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -29,6 +25,8 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.betterchat.www.MessageStructures.GetOnlineUserList;
+import com.betterchat.www.MessageStructures.SendMessage;
 import com.google.gson.Gson;
 
 public class ChatterActivity extends Activity {
@@ -40,22 +38,32 @@ public class ChatterActivity extends Activity {
 	private LayoutInflater mLayoutInflater;
 	private CustomAdapter mAdapter;
 	private int mCurrentView;
-	private View mSetupView;
 	public long timestamp = 0;
 	private ArrayList<ChatMessage> mMessageList;
 	private final static String TIMESTAMP = "timestamp";
-	
+    private Handler handlerClient;
+	private boolean mIsRotateEvent = false;
+    
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mMessageList = new ArrayList<ChatMessage>();
         mLayoutInflater = getLayoutInflater();
         mCurrentView = 0;
+        createHandler();
+        
         if(savedInstanceState != null) {
-        	mCurrentView = savedInstanceState.getInt("currentView", 100);
+        	final Object data = getLastNonConfigurationInstance();
+            if(data != null) {
+            	client = (Client) data;
+            	client.resumeUpdate(handlerClient);
+            	mCurrentView = savedInstanceState.getInt("currentView", 1);
+            	mUserName = savedInstanceState.getString("userName");
+            	mIpAddress = savedInstanceState.getString("ipAddress");
+            	//TODO getLast should return data object containing also array for listview
+            }
         }
-         
-        Client test = client;
+
         if(mCurrentView == 1) {
         	createChatterView();
         } else {
@@ -63,14 +71,53 @@ public class ChatterActivity extends Activity {
         }
     }
     
+	@Override
+    public Object onRetainNonConfigurationInstance() {
+		mIsRotateEvent = true;
+        return client;
+    }
+	
+	@Override
+    protected void onSaveInstanceState (Bundle outState) {
+    	outState.putInt("currentView", mCurrentView);
+    	outState.putString("userName", mUserName);
+    	outState.putString("ipAddress", mIpAddress);
+    	super.onSaveInstanceState(outState);
+    }
+    
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        if(mCurrentView == 1) {
-        	createChatterView();
-        } else {
-        	createSetupView();
+    protected void onStop() {
+        // We need an Editor object to make preference changes.
+        // All objects are from android.context.Context
+        SharedPreferences settings = getSharedPreferences(SHARED, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString("userName", mUserName);
+        editor.putString("ipAddress", mIpAddress);
+        editor.putLong(TIMESTAMP, timestamp);
+
+        // Commit the edits!
+        editor.commit();
+        
+        super.onStop();
+    }
+    
+    @Override
+    protected void onDestroy() {
+    	if(client != null && !mIsRotateEvent)
+    		client.Stop();
+    	super.onDestroy();
+    }
+    
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
+        	if(mCurrentView != 0) {
+        		mCurrentView = 0;
+        		setContentView(createSetupView());
+        		return true;
+        	}
         }
+        return super.onKeyDown(keyCode, event);
     }
     
     private void createChatterView() {
@@ -109,8 +156,12 @@ public class ChatterActivity extends Activity {
     	edit.requestFocus();
 	}
 
-	private void createSetupView() {
-        mSetupView = mLayoutInflater.inflate(R.layout.setup_display, null);
+	private View createSetupView() {
+		if(client != null) {
+			client.Stop();
+			client = null;
+		}
+        View mSetupView = mLayoutInflater.inflate(R.layout.setup_display, null);
         setContentView(mSetupView);
  		
         EditText textUser = (EditText)findViewById(R.id.ETUserName);
@@ -154,65 +205,8 @@ public class ChatterActivity extends Activity {
 					int after) {
 			} 
         });
+        return mSetupView;
 	}
-
-	@Override
-    protected void onSaveInstanceState (Bundle outState) {
-    	outState.putInt("currentView", mCurrentView);
-    	super.onSaveInstanceState(outState);
-    }
-    
-    @Override
-    protected void onStop() {
-    	if(client != null)
-    		client.Stop();
-    	
-        // We need an Editor object to make preference changes.
-        // All objects are from android.context.Context
-        SharedPreferences settings = getSharedPreferences(SHARED, 0);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putString("userName", mUserName);
-        editor.putString("ipAddress", mIpAddress);
-        editor.putLong(TIMESTAMP, timestamp);
-
-        // Commit the edits!
-        editor.commit();
-        
-        super.onStop();
-    }
-    
-    private Handler handlerClient = new Handler() {
-   	 
-    	public void handleMessage(Message msg) {
-    		boolean vibrate=true;
-    		switch (msg.what) {
-			case MessageTypes.USERLOGON:
-				addMessage("Logged on succesful");
-				break;
-			case MessageTypes.PUBLISHMESSAGE:
-				Time time = new Time(((PublishMessage) msg.obj).timeStamp);
-				SimpleDateFormat sdf = new SimpleDateFormat("MM-dd HH:mm:ss: ");
-				String strTime=sdf.format(time);
-				String name = "you";
-				// see if you are the sender
-				if (!((PublishMessage) msg.obj).sender.equalsIgnoreCase(mUserName))
-					name = ((PublishMessage) msg.obj).sender;
-				addMessage(strTime + name + "\n" + ((PublishMessage) msg.obj).message);
-				timestamp = ((PublishMessage) msg.obj).timeStamp;
-				break;
-			case MessageTypes.GETONLINEUSERLIST:
-				//TODO update list of online users
-				GetOnlineUserList userlist = (GetOnlineUserList) msg.obj;
-				String[] list = userlist.userList;
-				break;
-			default:
-				vibrate=false;
-				break;
-    		}
-    		if (vibrate)
-    			((Vibrator)getSystemService(VIBRATOR_SERVICE)).vibrate(300);
-    	}
-    };
     
     public void addMessage(String message) {
     	ChatMessage chatMessage = new ChatMessage();
@@ -223,6 +217,10 @@ public class ChatterActivity extends Activity {
     
     public void Connect(View view) {
     	createChatterView();
+    	createClient();
+    }
+    
+    public void createClient() {
     	client = new Client(mIpAddress, mUserName, handlerClient);
     	client.connect();
     	client.Start();
@@ -235,6 +233,40 @@ public class ChatterActivity extends Activity {
     	if (timestamp!=0)
     		client.getNewMessages(timestamp);
     }
+    
+    private void createHandler() {
+    	handlerClient = new Handler() {
+	    	public void handleMessage(Message msg) {
+	    		boolean vibrate=true;
+	    		switch (msg.what) {
+				case MessageTypes.USERLOGON:
+					addMessage("Logged on succesful");
+					break;
+				case MessageTypes.PUBLISHMESSAGE:
+					Time time = new Time(((PublishMessage) msg.obj).timeStamp);
+					SimpleDateFormat sdf = new SimpleDateFormat("MM-dd HH:mm:ss: ");
+					String strTime=sdf.format(time);
+					String name = "you";
+					// see if you are the sender
+					if (!((PublishMessage) msg.obj).sender.equalsIgnoreCase(mUserName))
+						name = ((PublishMessage) msg.obj).sender;
+					addMessage(strTime + name + "\n" + ((PublishMessage) msg.obj).message);
+					timestamp = ((PublishMessage) msg.obj).timeStamp;
+					break;
+				case MessageTypes.GETONLINEUSERLIST:
+					//TODO update list of online users
+					GetOnlineUserList userlist = (GetOnlineUserList) msg.obj;
+					String[] list = userlist.userList;
+					break;
+				default:
+					vibrate=false;
+					break;
+	    		}
+	    		if (vibrate)
+	    			((Vibrator)getSystemService(VIBRATOR_SERVICE)).vibrate(300);
+	    	}
+	    };
+	}
     
     public void sendMessage() {
     	EditText edit = (EditText) findViewById(R.id.ETSend);
@@ -254,18 +286,6 @@ public class ChatterActivity extends Activity {
     	sendMessage();
     }
     
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
-        	if(mCurrentView != 0) {
-        		mCurrentView = 0;
-        		setContentView(mSetupView);
-        		return true;
-        	}
-        }
-        return super.onKeyDown(keyCode, event);
-    }
-
 	public class CustomAdapter extends ArrayAdapter<ChatMessage> {
 		
 		private ArrayList<ChatMessage> mListItems;

@@ -1,6 +1,6 @@
-package iglugis.chatter.MessageStructures;
+package com.betterchat.www.MessageStructures;
 
-import iglugis.chatter.MessageTypes;
+import com.betterchat.www.MessageTypes;
 
 public class GetNewMessages extends AbstractMessageStructure {
 	public String receiver;

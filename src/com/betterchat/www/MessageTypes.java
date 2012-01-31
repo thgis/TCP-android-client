@@ -1,4 +1,4 @@
-package iglugis.chatter;
+package com.betterchat.www;
 
 public class MessageTypes {
 	public static final int USERLOGON = 1;

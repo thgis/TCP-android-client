@@ -1,4 +1,4 @@
-package iglugis.chatter;
+package com.betterchat.www;
 
 public class PublishMessage {
 	public int type;

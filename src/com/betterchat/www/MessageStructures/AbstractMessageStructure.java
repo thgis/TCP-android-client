@@ -1,4 +1,4 @@
-package iglugis.chatter.MessageStructures;
+package com.betterchat.www.MessageStructures;
 
 public abstract class AbstractMessageStructure {
 
