@@ -17,6 +17,7 @@ import android.util.Log;
 import iglugis.chatter.MessageTypes;
 import iglugis.chatter.MessageStructures.GetNewMessages;
 import iglugis.chatter.MessageStructures.GetOnlineUserList;
+import iglugis.chatter.MessageStructures.NewUserOnline;
 
 import com.google.gson.Gson;
 
@@ -27,6 +28,8 @@ public class Client implements Runnable {
 	private String Name;
 	private Handler handle;
 	private String ipadresse;
+	private final long TIMEOUT = 60*1000;
+	private long dataReceivedTime=0;
 	enum RECEIVESTATE {WAITING, RECEIVING,ENDING};
 	
 	OutputStream outStream;
@@ -44,17 +47,22 @@ public class Client implements Runnable {
 		buffer = new byte[1024];
 		this.ipadresse = ipAddress;
 		this.receiveState = RECEIVESTATE.WAITING;
+
 	}
 	
 	public void connect()
 	{
 		try {
+			this.dataReceivedTime = System.currentTimeMillis();
 			kkSocket = new Socket(this.ipadresse , 8000);
 			outStream = kkSocket.getOutputStream();
 			instream = kkSocket.getInputStream();
+
 		} catch (UnknownHostException e) {
+			Log.d("connect", "Host not available");
 			e.printStackTrace();
 		} catch (IOException e) {
+			Log.d("connect", "Could not connect");
 			e.printStackTrace();
 		}
 	}
@@ -71,32 +79,52 @@ public class Client implements Runnable {
     public void Read()
     {
 		try {
+			if (this.TIMEOUT < System.currentTimeMillis() - this.dataReceivedTime)
+			{
+				sendKeepAlive();
+				this.dataReceivedTime = System.currentTimeMillis();
+			}
 	        int bytes = instream.available();
 	        if( bytes > 0 )
 	        {
 	        	 instream.read(buffer, 0, bytes);
 	        	 String data = new String(buffer,0,bytes);
 	        	 handleData(data);
+	        	 this.dataReceivedTime = System.currentTimeMillis();
 	        }
 	        
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			Log.d("Read","Connection lost");
 			e.printStackTrace();
 		}
     }
     
-    private void handleData(String data)
+    private void sendKeepAlive() {
+		try
+		{
+			if (!kkSocket.isConnected())
+				Log.d("sendKeepAlive","isConnected returned false");
+			if (kkSocket.isOutputShutdown())
+				Log.d("sendKeepAlive","isOutputShutdown returned true");
+			this.outStream.write(0x03);
+		}
+		catch (IOException e) {
+			Log.d("sendKeepAlive","sending something for keep alive");
+		}
+		
+	}
+
+	private void handleData(String data)
     {
     	for (char c : data.toCharArray()) 
     	{
+    		if (c== 0x02)
+    		{
+    			this.receiveState=RECEIVESTATE.RECEIVING;
+				this.inputBuffer="";
+				continue;
+    		}
 			switch (this.receiveState) {				
-			case WAITING:
-				if (c == 0x02)
-				{
-					this.receiveState=RECEIVESTATE.RECEIVING;
-					this.inputBuffer="";
-				}
-				break;
 			case RECEIVING:
 				if (c==0x10)
 					this.receiveState=RECEIVESTATE.ENDING;
@@ -153,6 +181,12 @@ public class Client implements Runnable {
 			mess.obj = userList;
 			handle.sendMessage(mess);
 			break;
+		case MessageTypes.NEWUSERONLINE:
+			Log.d("handleMessage","NEWUSERONLINE");
+			NewUserOnline userOnline = new Gson().fromJson(message, NewUserOnline.class);
+			mess.what=MessageTypes.NEWUSERONLINE;
+			mess.obj = userOnline;
+			handle.sendMessage(mess);
 		default:
 			break;
 		}
@@ -171,8 +205,8 @@ public class Client implements Runnable {
 			outStream.write(endByte, 0, endByte.length);
 			outStream.flush();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Log.d("sendMessage", "IOException caucht. Connection properly lost");
+			//TODO connection properly lost. Maybe reconnect
 		}
     }
     

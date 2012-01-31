@@ -1,6 +1,7 @@
 package iglugis.chatter;
 
 import iglugis.chatter.MessageStructures.GetOnlineUserList;
+import iglugis.chatter.MessageStructures.NewUserOnline;
 import iglugis.chatter.MessageStructures.SendMessage;
 
 import java.lang.Character.UnicodeBlock;
@@ -141,6 +142,10 @@ public class ChatterActivity extends Activity {
 				GetOnlineUserList userlist = (GetOnlineUserList) msg.obj;
 				String[] list = userlist.userList;
 				break;
+			case MessageTypes.NEWUSERONLINE:
+				NewUserOnline userOnline = (NewUserOnline) msg.obj;
+				addMessage("user " + userOnline.userName + " logged on");
+				
 			default:
 				vibrate=false;
 				break;
