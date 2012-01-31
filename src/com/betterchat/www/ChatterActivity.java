@@ -55,12 +55,14 @@ public class ChatterActivity extends Activity {
         if(savedInstanceState != null) {
         	final Object data = getLastNonConfigurationInstance();
             if(data != null) {
-            	client = (Client) data;
+            	ReetainContainer container = (ReetainContainer) data;
+            	client = container.mClient;
             	client.resumeUpdate(handlerClient);
+            	mMessageList = container.mChatMessages;
+            	
             	mCurrentView = savedInstanceState.getInt("currentView", 1);
             	mUserName = savedInstanceState.getString("userName");
             	mIpAddress = savedInstanceState.getString("ipAddress");
-            	//TODO getLast should return data object containing also array for listview
             }
         }
 
@@ -74,7 +76,10 @@ public class ChatterActivity extends Activity {
 	@Override
     public Object onRetainNonConfigurationInstance() {
 		mIsRotateEvent = true;
-        return client;
+		ReetainContainer container = new ReetainContainer();
+		container.mChatMessages = mMessageList;
+		container.mClient = client;
+        return container;
     }
 	
 	@Override
