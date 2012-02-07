@@ -22,16 +22,24 @@
 	        android:text="@string/dataToSend" 
 	        android:layout_width="wrap_content" 
 	        android:id="@+id/textView2"/>
-	    <EditText 
-	        android:layout_height="wrap_content" 
-	        android:layout_width="match_parent" 
-	        android:id="@+id/ETSend"/>
-	    <Button 
-	        android:layout_height="wrap_content" 
-	        android:id="@+id/button1" 
-	        android:onClick="Send" 
-	        android:layout_width="wrap_content"
-	        android:enabled="false"
-	        android:text="@string/btnSend"/>
+	    <LinearLayout 
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:orientation="horizontal">
+	        <EditText 
+	            android:layout_height="wrap_content" 
+	            android:layout_width="0dp"
+	            android:imeOptions="actionSend"
+	            android:layout_weight="1"
+	            android:id="@+id/ETSend"/>
+	        <Button 
+	            android:layout_height="wrap_content" 
+	            android:layout_width="wrap_content"
+	            android:id="@+id/button1" 
+	            android:onClick="Send" 
+	            android:enabled="false"
+	            android:text="@string/btnSend"/>
+	    </LinearLayout>
+
     </LinearLayout>
 </RelativeLayout>

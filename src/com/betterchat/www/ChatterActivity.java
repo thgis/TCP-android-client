@@ -1,6 +1,5 @@
 package com.betterchat.www;
 
-
 import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -14,8 +13,6 @@ import android.os.Message;
 import android.os.Vibrator;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.text.format.DateFormat;
-import android.util.TimeFormatException;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -147,13 +144,13 @@ public class ChatterActivity extends Activity {
     	TextView.OnEditorActionListener exampleListener = new TextView.OnEditorActionListener(){
     		public boolean onEditorAction(TextView exampleView, int actionId, KeyEvent event) {
     		    switch(actionId){
-    		    case EditorInfo.IME_NULL:
-        		    if (event.getAction() != KeyEvent.ACTION_DOWN) {
-        		    	return false;
-        		    }
-    		    	sendMessage();
-    		    	break;
-    		    case EditorInfo.IME_ACTION_DONE:
+//    		    case EditorInfo.IME_NULL:
+//        		    if (event.getAction() != KeyEvent.ACTION_DOWN) {
+//        		    	return false;
+//        		    }
+//    		    	sendMessage();
+//    		    	break;
+    		    case EditorInfo.IME_ACTION_SEND:
     		    	sendMessage();
     		    	break;
     		    }
