@@ -13,11 +13,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
-
-
-import com.betterchat.www.MessageTypes;
 import com.betterchat.www.MessageStructures.GetNewMessages;
 import com.betterchat.www.MessageStructures.GetOnlineUserList;
+import com.betterchat.www.MessageStructures.NewUserOnline;
 import com.google.gson.Gson;
 
 
