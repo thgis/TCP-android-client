@@ -1,5 +1,6 @@
 package com.betterchat.www;
 
+
 import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -13,6 +14,8 @@ import android.os.Message;
 import android.os.Vibrator;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.text.format.DateFormat;
+import android.util.TimeFormatException;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
