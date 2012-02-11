@@ -9,4 +9,5 @@
     <string name="readData">Læs data</string>
     <string name="serverip">Server IP:</string>
     <string name="setup_done_txt">Done</string>
+    <string name="menu_users">Online users</string>
 </resources>

@@ -3,8 +3,15 @@
        android:id="@+id/scroll" 
        android:layout_width="fill_parent"
  	   android:layout_height="fill_parent">
-    <LinearLayout 
+ 	<LinearLayout
+        android:id="@+id/user_list_container"
+        android:layout_alignParentTop="true"
+        android:orientation="vertical" 
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"/>
+    <LinearLayout
         android:id="@+id/container"
+        android:layout_below="@+id/user_list_container"
         android:orientation="vertical" 
         android:layout_width="fill_parent"
         android:layout_height="wrap_content">

@@ -4,7 +4,6 @@ import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -15,21 +14,33 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
+import android.view.animation.AnimationSet;
+import android.view.animation.LayoutAnimationController;
+import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.betterchat.www.MessageStructures.GetOnlineUserList;
 import com.betterchat.www.MessageStructures.SendMessage;
+import com.betterchat.www.ui.actionbar.ActionBarActivity;
 import com.google.gson.Gson;
 
-public class ChatterActivity extends Activity {
+public class ChatterActivity extends ActionBarActivity {
 	private Client client;
 	private final String SHARED = "sharedchatterpref";
 	private String mUserName;
@@ -123,6 +134,33 @@ public class ChatterActivity extends Activity {
         	}
         }
         return super.onKeyDown(keyCode, event);
+    }
+    
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.main, menu);
+
+        // Calling super after populating the menu is necessary here to ensure that the
+        // action bar helpers have a chance to handle this event.
+        return super.onCreateOptionsMenu(menu);
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+	        case android.R.id.home:
+	            Toast.makeText(this, "Tapped home", Toast.LENGTH_SHORT).show();
+	            break;
+            case R.id.menu_users:
+                Toast.makeText(this, "Tapped users", Toast.LENGTH_SHORT).show();
+                //TODO <--Here trying to figure out how to make a proper drop down
+                LinearLayout lin = (LinearLayout)findViewById(R.id.user_list_container);
+                setLayoutAnimSlidedownfromtop(lin, this);
+                lin.addView(getLayoutInflater().inflate(R.layout.user_panel,null),0);
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
     
     private void createChatterView() {
@@ -338,5 +376,27 @@ public class ChatterActivity extends Activity {
 	private static class ViewHolder {
 		TextView text;
 		ImageView image;
+	}
+	
+	
+	public static void setLayoutAnimSlidedownfromtop(ViewGroup panel, Context ctx) {
+
+		  AnimationSet set = new AnimationSet(true);
+
+		  Animation animation = new AlphaAnimation(0.0f, 1.0f);
+		  animation.setDuration(100);
+		  set.addAnimation(animation);
+
+		  animation = new TranslateAnimation(
+		      Animation.RELATIVE_TO_SELF, 0.0f, Animation.RELATIVE_TO_SELF, 0.0f,
+		      Animation.RELATIVE_TO_SELF, -1.0f, Animation.RELATIVE_TO_SELF, 0.0f
+		  );
+		  animation.setDuration(500);
+		  set.addAnimation(animation);
+
+		  LayoutAnimationController controller =
+		      new LayoutAnimationController(set, 0.25f);
+		  panel.setLayoutAnimation(controller);
+
 	}
 }
