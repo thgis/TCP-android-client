@@ -251,14 +251,16 @@ public class ChatterActivity extends Activity {
 					addMessage("Logged on succesful");
 					break;
 				case MessageTypes.PUBLISHMESSAGE:
-					Time time = new Time(((PublishMessage) msg.obj).timeStamp);
-					SimpleDateFormat sdf = new SimpleDateFormat("MM-dd HH:mm:ss: ");
-					String strTime=sdf.format(time);
-					String name = "you";
-					// see if you are the sender
-					if (!((PublishMessage) msg.obj).sender.equalsIgnoreCase(mUserName))
-						name = ((PublishMessage) msg.obj).sender;
-					addMessage(strTime + name + "\n" + ((PublishMessage) msg.obj).message);
+					// The following have been extracted to a new method
+					//Time time = new Time(((PublishMessage) msg.obj).timeStamp);
+					//SimpleDateFormat sdf = new SimpleDateFormat("MM-dd HH:mm:ss: ");
+					//String strTime=sdf.format(time);
+					//String name = "you";
+					//// see if you are the sender
+					//if (!((PublishMessage) msg.obj).sender.equalsIgnoreCase(mUserName))
+					//	name = ((PublishMessage) msg.obj).sender;
+					//addMessage(strTime + name + "\n" + ((PublishMessage) msg.obj).message);
+					addMessage(constructStringMessage((PublishMessage)msg.obj));
 					timestamp = ((PublishMessage) msg.obj).timeStamp;
 					break;
 				case MessageTypes.GETONLINEUSERLIST:
@@ -275,6 +277,18 @@ public class ChatterActivity extends Activity {
 	    	}
 	    };
 	}
+    
+    private String constructStringMessage(PublishMessage msg)
+    {
+    	Time time = new Time(msg.timeStamp);
+		SimpleDateFormat sdf = new SimpleDateFormat("MM-dd HH:mm:ss: ");
+		String strTime=sdf.format(time);
+		String name = "you";
+		// see if you are the sender
+		if (!msg.sender.equalsIgnoreCase(mUserName))
+			name = msg.sender;
+		return strTime + name + "\n" +  msg.message;
+    }
     
     public void sendMessage() {
     	EditText edit = (EditText) findViewById(R.id.ETSend);
