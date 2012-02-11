@@ -46,6 +46,7 @@ public class ChatterActivity extends Activity {
 	private final static String TIMESTAMP = "timestamp";
     private Handler handlerClient;
 	private boolean mIsRotateEvent = false;
+	private DBAdapter mDBAdapter;
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -54,7 +55,8 @@ public class ChatterActivity extends Activity {
         mLayoutInflater = getLayoutInflater();
         mCurrentView = 0;
         createHandler();
-        
+        mDBAdapter = new DBAdapter(this);
+        mDBAdapter.open();
         if(savedInstanceState != null) {
         	final Object data = getLastNonConfigurationInstance();
             if(data != null) {
@@ -113,6 +115,7 @@ public class ChatterActivity extends Activity {
     protected void onDestroy() {
     	if(client != null && !mIsRotateEvent)
     		client.Stop();
+    	mDBAdapter.close();
     	super.onDestroy();
     }
     
@@ -226,9 +229,19 @@ public class ChatterActivity extends Activity {
     public void Connect(View view) {
     	createChatterView();
     	createClient();
+    	loadMessages();
     }
     
-    public void createClient() {
+    private void loadMessages() {
+    	PublishMessage[] messages = mDBAdapter.getLatestMessages(5);
+    	for (int i=0;i<messages.length;i++)
+    	{
+    		addMessage(constructStringMessage(messages[i]));
+    	}
+		
+	}
+
+	public void createClient() {
     	client = new Client(mIpAddress, mUserName, handlerClient);
     	client.connect();
     	client.Start();
@@ -262,12 +275,15 @@ public class ChatterActivity extends Activity {
 					//addMessage(strTime + name + "\n" + ((PublishMessage) msg.obj).message);
 					addMessage(constructStringMessage((PublishMessage)msg.obj));
 					timestamp = ((PublishMessage) msg.obj).timeStamp;
+					// save message to database
+					mDBAdapter.insertMessage((PublishMessage)msg.obj);
 					break;
 				case MessageTypes.GETONLINEUSERLIST:
 					//TODO update list of online users
 					GetOnlineUserList userlist = (GetOnlineUserList) msg.obj;
 					String[] list = userlist.userList;
 					break;
+
 				default:
 					vibrate=false;
 					break;
