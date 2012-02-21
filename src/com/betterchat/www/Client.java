@@ -3,6 +3,7 @@ package com.betterchat.www;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
@@ -48,21 +49,25 @@ public class Client implements Runnable {
 
 	}
 	
-	public void connect()
+	public boolean connect()
 	{
 		try {
 			this.dataReceivedTime = System.currentTimeMillis();
-			kkSocket = new Socket(this.ipadresse , 8000);
+			kkSocket = new Socket();//this.ipadresse , 8000
+			kkSocket.connect(new InetSocketAddress(this.ipadresse , 8000), 10000);
 			outStream = kkSocket.getOutputStream();
 			instream = kkSocket.getInputStream();
 
 		} catch (UnknownHostException e) {
 			Log.d("connect", "Host not available");
 			e.printStackTrace();
+			return false;
 		} catch (IOException e) {
 			Log.d("connect", "Could not connect");
 			e.printStackTrace();
+			return false;
 		}
+		return true;
 	}
 	
 	public void sendUserLogon()

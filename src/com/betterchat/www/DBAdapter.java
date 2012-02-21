@@ -78,6 +78,7 @@ public class DBAdapter {
 			
 			messageArray[cursor.getCount()-i] = message;
 		}
+		cursor.close();
 		return messageArray;
 	}
 	public void clearAllMessages()
