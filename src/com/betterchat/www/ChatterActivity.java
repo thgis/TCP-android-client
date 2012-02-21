@@ -19,16 +19,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.view.animation.Animation.AnimationListener;
-import android.view.animation.AnimationSet;
-import android.view.animation.LayoutAnimationController;
-import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -37,6 +32,7 @@ import android.widget.Toast;
 
 import com.betterchat.www.MessageStructures.GetOnlineUserList;
 import com.betterchat.www.MessageStructures.SendMessage;
+import com.betterchat.www.animation.ExpandCollapseAnimation;
 import com.betterchat.www.ui.actionbar.ActionBarActivity;
 import com.google.gson.Gson;
 
@@ -154,10 +150,9 @@ public class ChatterActivity extends ActionBarActivity {
 	            break;
             case R.id.menu_users:
                 Toast.makeText(this, "Tapped users", Toast.LENGTH_SHORT).show();
-                //TODO <--Here trying to figure out how to make a proper drop down
-                LinearLayout lin = (LinearLayout)findViewById(R.id.user_list_container);
-                setLayoutAnimSlidedownfromtop(lin, this);
-                lin.addView(getLayoutInflater().inflate(R.layout.user_panel,null),0);
+                HorizontalScrollView lin = (HorizontalScrollView) findViewById(R.id.user_list_scrollview);
+                ExpandCollapseAnimation animation = new ExpandCollapseAnimation(lin, 500);
+                lin.startAnimation(animation);
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -297,9 +292,15 @@ public class ChatterActivity extends ActionBarActivity {
 					timestamp = ((PublishMessage) msg.obj).timeStamp;
 					break;
 				case MessageTypes.GETONLINEUSERLIST:
-					//TODO update list of online users
 					GetOnlineUserList userlist = (GetOnlineUserList) msg.obj;
 					String[] list = userlist.userList;
+					
+					LinearLayout userContainer = (LinearLayout)findViewById(R.id.user_list_container);
+					for(String user : list) {
+						TextView userView = (TextView) mLayoutInflater.inflate(R.layout.user, null);
+						userView.setText(user);
+						userContainer.addView(userView);
+					}
 					break;
 				default:
 					vibrate=false;
@@ -376,27 +377,5 @@ public class ChatterActivity extends ActionBarActivity {
 	private static class ViewHolder {
 		TextView text;
 		ImageView image;
-	}
-	
-	
-	public static void setLayoutAnimSlidedownfromtop(ViewGroup panel, Context ctx) {
-
-		  AnimationSet set = new AnimationSet(true);
-
-		  Animation animation = new AlphaAnimation(0.0f, 1.0f);
-		  animation.setDuration(100);
-		  set.addAnimation(animation);
-
-		  animation = new TranslateAnimation(
-		      Animation.RELATIVE_TO_SELF, 0.0f, Animation.RELATIVE_TO_SELF, 0.0f,
-		      Animation.RELATIVE_TO_SELF, -1.0f, Animation.RELATIVE_TO_SELF, 0.0f
-		  );
-		  animation.setDuration(500);
-		  set.addAnimation(animation);
-
-		  LayoutAnimationController controller =
-		      new LayoutAnimationController(set, 0.25f);
-		  panel.setLayoutAnimation(controller);
-
 	}
 }
