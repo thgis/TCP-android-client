@@ -5,9 +5,11 @@ import com.betterchat.www.MessageStructures.SendMessage;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 public class DBAdapter {
 	public static final String KEY_ID = "id";
@@ -61,7 +63,13 @@ public class DBAdapter {
 		cv.put(KEY_SENDER,message.sender);
 		cv.put(KEY_TIMESTAMP, message.timeStamp);
 		
+		try{
 		return db.insert(DATABASE_TABLE, null, cv);
+		}
+		catch (SQLiteConstraintException e) {
+			Log.d("sqlite","Database problem");
+		}
+		return -1;
 	}
 	public PublishMessage[] getLatestMessages(int maxNum)
 	{
