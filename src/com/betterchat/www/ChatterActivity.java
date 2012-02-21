@@ -82,6 +82,7 @@ public class ChatterActivity extends ActionBarActivity {
         }
     }
     
+    //TODO working on this
 	@Override
     public Object onRetainNonConfigurationInstance() {
 		mIsRotateEvent = true;
