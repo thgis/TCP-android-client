@@ -51,7 +51,7 @@ public class ChatterActivity extends ActionBarActivity {
     private Handler handlerClient;
 	private boolean mIsRotateEvent = false;
 	private DBAdapter mDBAdapter;
-    
+    //TODO amazon ip:176.34.177.147
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -257,32 +257,36 @@ public class ChatterActivity extends ActionBarActivity {
     }
     
     public void Connect(View view) {
-    	createChatterView();
-    	createClient();
-    	loadMessages();
+    	boolean isConnected = createClient();
+    	if(isConnected) {
+    		createChatterView();
+    		loadMessages();
+    	}
     }
     
     private void loadMessages() {
     	PublishMessage[] messages = mDBAdapter.getLatestMessages(5);
-    	for (int i=0;i<messages.length;i++)
-    	{
+    	for (int i=0;i<messages.length;i++) {
     		addMessage(constructStringMessage(messages[i]));
     	}
 		
 	}
 
-	public void createClient() {
+	public boolean createClient() {
     	client = new Client(mIpAddress, mUserName, handlerClient);
-    	client.connect();
-    	client.Start();
-    	client.sendUserLogon();
-    	
-    	GetOnlineUserList userList = new GetOnlineUserList();
-    	client.SendMessage(new Gson().toJson(userList));
-    	
-    	// inform server to send messages earlier than <timestamp>
-    	if (timestamp!=0)
-    		client.getNewMessages(timestamp);
+    	boolean isConnected = client.connect();
+    	if(isConnected) {
+	    	client.Start();
+	    	client.sendUserLogon();
+	    	
+	    	GetOnlineUserList userList = new GetOnlineUserList();
+	    	client.SendMessage(new Gson().toJson(userList));
+	    	
+	    	// inform server to send messages earlier than <timestamp>
+	    	if (timestamp!=0)
+	    		client.getNewMessages(timestamp);
+    	}
+    	return isConnected;
     }
     
     private void createHandler() {
@@ -294,15 +298,6 @@ public class ChatterActivity extends ActionBarActivity {
 					addMessage("Logged on succesful");
 					break;
 				case MessageTypes.PUBLISHMESSAGE:
-					// The following have been extracted to a new method
-					//Time time = new Time(((PublishMessage) msg.obj).timeStamp);
-					//SimpleDateFormat sdf = new SimpleDateFormat("MM-dd HH:mm:ss: ");
-					//String strTime=sdf.format(time);
-					//String name = "you";
-					//// see if you are the sender
-					//if (!((PublishMessage) msg.obj).sender.equalsIgnoreCase(mUserName))
-					//	name = ((PublishMessage) msg.obj).sender;
-					//addMessage(strTime + name + "\n" + ((PublishMessage) msg.obj).message);
 					addMessage(constructStringMessage((PublishMessage)msg.obj));
 					timestamp = ((PublishMessage) msg.obj).timeStamp;
 					// save message to database
@@ -345,11 +340,10 @@ public class ChatterActivity extends ActionBarActivity {
     public void sendMessage() {
     	EditText edit = (EditText) findViewById(R.id.ETSend);
     	String msg = edit.getText().toString();
-    	//addMessage("You: " + msg);
     	SendMessage message = new SendMessage();
-    	message.message=msg;
-    	message.receiver="all";
-    	message.sender=mUserName;
+    	message.message = msg;
+    	message.receiver = "all";
+    	message.sender = mUserName;
     	Gson gson = new Gson();
     	String serializedMessage = gson.toJson(message);
     	client.SendMessage(serializedMessage);
