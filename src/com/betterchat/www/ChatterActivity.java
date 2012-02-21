@@ -1,11 +1,9 @@
 package com.betterchat.www;
 
-
 import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -14,25 +12,31 @@ import android.os.Message;
 import android.os.Vibrator;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.text.format.DateFormat;
-import android.util.TimeFormatException;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.betterchat.www.MessageStructures.GetOnlineUserList;
 import com.betterchat.www.MessageStructures.SendMessage;
+import com.betterchat.www.animation.ExpandCollapseAnimation;
+import com.betterchat.www.ui.actionbar.ActionBarActivity;
 import com.google.gson.Gson;
 
-public class ChatterActivity extends Activity {
+public class ChatterActivity extends ActionBarActivity {
 	private Client client;
 	private final String SHARED = "sharedchatterpref";
 	private String mUserName;
@@ -131,6 +135,32 @@ public class ChatterActivity extends Activity {
         return super.onKeyDown(keyCode, event);
     }
     
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.main, menu);
+
+        // Calling super after populating the menu is necessary here to ensure that the
+        // action bar helpers have a chance to handle this event.
+        return super.onCreateOptionsMenu(menu);
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+	        case android.R.id.home:
+	            Toast.makeText(this, "Tapped home", Toast.LENGTH_SHORT).show();
+	            break;
+            case R.id.menu_users:
+                Toast.makeText(this, "Tapped users", Toast.LENGTH_SHORT).show();
+                HorizontalScrollView lin = (HorizontalScrollView) findViewById(R.id.user_list_scrollview);
+                ExpandCollapseAnimation animation = new ExpandCollapseAnimation(lin, 500);
+                lin.startAnimation(animation);
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+    
     private void createChatterView() {
     	setContentView(R.layout.chat_display);
     	mCurrentView = 1;
@@ -150,13 +180,13 @@ public class ChatterActivity extends Activity {
     	TextView.OnEditorActionListener exampleListener = new TextView.OnEditorActionListener(){
     		public boolean onEditorAction(TextView exampleView, int actionId, KeyEvent event) {
     		    switch(actionId){
-    		    case EditorInfo.IME_NULL:
-        		    if (event.getAction() != KeyEvent.ACTION_DOWN) {
-        		    	return false;
-        		    }
-    		    	sendMessage();
-    		    	break;
-    		    case EditorInfo.IME_ACTION_DONE:
+//    		    case EditorInfo.IME_NULL:
+//        		    if (event.getAction() != KeyEvent.ACTION_DOWN) {
+//        		    	return false;
+//        		    }
+//    		    	sendMessage();
+//    		    	break;
+    		    case EditorInfo.IME_ACTION_SEND:
     		    	sendMessage();
     		    	break;
     		    }
@@ -279,9 +309,15 @@ public class ChatterActivity extends Activity {
 					mDBAdapter.insertMessage((PublishMessage)msg.obj);
 					break;
 				case MessageTypes.GETONLINEUSERLIST:
-					//TODO update list of online users
 					GetOnlineUserList userlist = (GetOnlineUserList) msg.obj;
 					String[] list = userlist.userList;
+					
+					LinearLayout userContainer = (LinearLayout)findViewById(R.id.user_list_container);
+					for(String user : list) {
+						TextView userView = (TextView) mLayoutInflater.inflate(R.layout.user, null);
+						userView.setText(user);
+						userContainer.addView(userView);
+					}
 					break;
 
 				default:
