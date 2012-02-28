@@ -13,6 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.betterchat.www.animation.ExpandCollapseAnimation;
+import com.betterchat.www.ui.ChatFragment;
 import com.betterchat.www.ui.OnUserListUpdatedListener;
 import com.betterchat.www.ui.actionbar.ActionBarActivity;
 
@@ -22,6 +23,13 @@ public class ChatterActivity extends ActionBarActivity implements OnUserListUpda
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chat_main_view);
+        
+        // First time init, create the UI
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.main_chat_frame,
+                    new ChatFragment()).commit();
+        }
+
     }
     
     @Override

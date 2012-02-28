@@ -38,21 +38,18 @@ import com.google.gson.Gson;
 
 public class ChatFragment extends ListFragment implements OnClickListener {
 	private LayoutInflater mLayoutInflater;
-	private String mUserName = "test";
-	private Client client;
 	private ArrayAdapter<ChatMessage> mAdapter;
 	private DBAdapter mDBAdapter;
-	private String mIpAddress = "176.34.177.147";
 	private Handler handlerClient;
-	private int timestamp = 0;
-	private final static String TIMESTAMP = "timestamp";
-	private final static String SHARED = "sharedchatterpref";
 	private ArrayList<ChatMessage> mMessageList;
 	private OnUserListUpdatedListener mListener;
 	private RetainedFragment mWorkFragment;
+	private Client client;
 	public static final int UPDATED_USER_LIST = 0;
-	//TODO Finish the retainedfragment.
+	private String mUserName = "test";
+	private int timestamp = 0;
 	//TODO Make sure client has a proper lock
+	//TODO Remember mMessageList on flip screen somehow
 	
     @Override
     public void onAttach(Activity activity) {
@@ -79,37 +76,11 @@ public class ChatFragment extends ListFragment implements OnClickListener {
         	mWorkFragment.setTargetFragment(this, 0);
         	fm.beginTransaction().add(mWorkFragment, "work").commit();
         }
+        client = mWorkFragment.getClient();
         
-        
-        mDBAdapter = new DBAdapter(getActivity());
-        mDBAdapter.open();
-        
-    	boolean isConnected = createClient();
-    	if(isConnected) {
-    		loadMessages();
-    	} else {
-    		// we didn't connect
-    		//TODO Handle it
-    	}
+//        mDBAdapter = new DBAdapter(getActivity());
+//        mDBAdapter.open();
     }
-    
-//  @Override
-//  public void onActivityCreated(Bundle savedInstanceState) {
-//      super.onActivityCreated(savedInstanceState);
-//
-//      FragmentManager fm = getFragmentManager();
-//
-//      // Check to see if we have retained the worker fragment.
-//      mWorkFragment = (RetainedFragment)fm.findFragmentByTag("work");
-//
-//      // If not retained (or first time running), we need to create it.
-//      if (mWorkFragment == null) {
-//          mWorkFragment = new RetainedFragment();
-//          // Tell it who it is working with.
-//          mWorkFragment.setTargetFragment(this, 0);
-//          fm.beginTransaction().add(mWorkFragment, "work").commit();
-//      }
-//  }
     
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -120,14 +91,14 @@ public class ChatFragment extends ListFragment implements OnClickListener {
     	mMessageList = new ArrayList<ChatMessage>();
  		mAdapter = new CustomAdapter(getActivity(), R.layout.row, mMessageList);
  		
+// 		this.getListView().setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
  		setListAdapter(mAdapter);
- 		getListView().setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
     	
-    	Button sendBtn = (Button) getView().findViewById(R.id.chat_display_send_btn);
+ 		Button sendBtn = (Button) view.findViewById(R.id.chat_display_send_btn);
     	sendBtn.setEnabled(true);
     	sendBtn.setOnClickListener(this);
     	
-    	EditText edit = (EditText) getView().findViewById(R.id.ETSend);
+    	EditText edit = (EditText) view.findViewById(R.id.ETSend);
     	
     	TextView.OnEditorActionListener exampleListener = new TextView.OnEditorActionListener(){
     		public boolean onEditorAction(TextView exampleView, int actionId, KeyEvent event) {
@@ -204,8 +175,7 @@ public class ChatFragment extends ListFragment implements OnClickListener {
 		ImageView image;
 	}
 	
-    private String constructStringMessage(PublishMessage msg)
-    {
+    private String constructStringMessage(PublishMessage msg) {
     	Time time = new Time(msg.timeStamp);
 		SimpleDateFormat sdf = new SimpleDateFormat("MM-dd HH:mm:ss: ");
 		String strTime=sdf.format(time);
@@ -234,13 +204,7 @@ public class ChatFragment extends ListFragment implements OnClickListener {
     	chatMessage.message = message;
 		mAdapter.add(chatMessage);
 		mAdapter.notifyDataSetChanged();
-    }
-    
-    public void Connect(View view) {
-    	boolean isConnected = createClient();
-    	if(isConnected) {
-    		loadMessages();
-    	}
+		/* Det har været sjovt! */
     }
     
     private void loadMessages() {
@@ -250,26 +214,10 @@ public class ChatFragment extends ListFragment implements OnClickListener {
     	}
 	}
 
-	public boolean createClient() {
-    	client = new Client(mIpAddress, mUserName, handlerClient);
-    	boolean isConnected = client.connect();
-    	if(isConnected) {
-	    	client.Start();
-	    	client.sendUserLogon();
-	    	
-	    	GetOnlineUserList userList = new GetOnlineUserList();
-	    	client.SendMessage(new Gson().toJson(userList));
-	    	
-	    	// inform server to send messages earlier than <timestamp>
-	    	if (timestamp!=0)
-	    		client.getNewMessages(timestamp);
-    	}
-    	return isConnected;
-    }
-    
     private void createHandler() {
     	handlerClient = new Handler() {
-	    	public void handleMessage(Message msg) {
+
+			public void handleMessage(Message msg) {
 	    		boolean vibrate=true;
 	    		switch (msg.what) {
 				case MessageTypes.USERLOGON:
@@ -279,7 +227,7 @@ public class ChatFragment extends ListFragment implements OnClickListener {
 					addMessage(constructStringMessage((PublishMessage)msg.obj));
 					timestamp = (int) ((PublishMessage) msg.obj).timeStamp;
 					// save message to database
-					mDBAdapter.insertMessage((PublishMessage)msg.obj);
+//					mDBAdapter.insertMessage((PublishMessage)msg.obj);
 					break;
 				case MessageTypes.GETONLINEUSERLIST:
 					GetOnlineUserList userlist = (GetOnlineUserList) msg.obj;
@@ -300,4 +248,8 @@ public class ChatFragment extends ListFragment implements OnClickListener {
 	    	}
 	    };
 	}
+    
+    public Handler getHandler() {
+    	return handlerClient;
+    }
 }
