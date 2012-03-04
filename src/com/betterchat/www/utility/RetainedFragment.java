@@ -88,7 +88,7 @@ public class RetainedFragment extends Fragment {
     	return isConnected;
     }
 
-	public Client getClient() {
-		return client;
+	public void sendMessage(String serializedMessage) {
+		client.SendMessage(serializedMessage);
 	}
 }
