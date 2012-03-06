@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -47,7 +48,9 @@ public class ChatFragment extends ListFragment implements OnClickListener {
 	private Client client;
 	public static final int UPDATED_USER_LIST = 0;
 	private String mUserName = "test";
-	private int timestamp = 0;
+	private long timestamp = 0;
+	private final String TIMESTAMP = "timestamp";
+	private final String SHARED = "sharedchatterpref";
 	//TODO Make sure client has a proper lock
 	//TODO Remember mMessageList on flip screen somehow
 	
@@ -65,7 +68,6 @@ public class ChatFragment extends ListFragment implements OnClickListener {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         createHandler();
-        
         FragmentManager fm = getFragmentManager();
         // Check to see if we have retained the worker fragment.
         mWorkFragment = (RetainedFragment)fm.findFragmentByTag("work"); 
@@ -78,8 +80,23 @@ public class ChatFragment extends ListFragment implements OnClickListener {
         }
         client = mWorkFragment.getClient();
         client.setHandler(handlerClient);
-//        mDBAdapter = new DBAdapter(getActivity());
-//        mDBAdapter.open();
+        
+        
+    }
+    
+    @Override
+    public void onStart() {
+    	super.onStart();
+        mDBAdapter = new DBAdapter(getActivity());
+        mDBAdapter.open();
+        
+        // load timestamp
+        SharedPreferences settings = getActivity().getSharedPreferences(SHARED, 0);
+        timestamp = settings.getLong(TIMESTAMP, 0);
+        loadMessages();
+ 		// getNewMessages gets new messages from server
+ 		client.getNewMessages(timestamp);
+
     }
     
 	@Override
@@ -89,7 +106,11 @@ public class ChatFragment extends ListFragment implements OnClickListener {
 		View view = mLayoutInflater.inflate(R.layout.chat_display, null);
 		
     	mMessageList = new ArrayList<ChatMessage>();
+    	// read messages from data base
+
+    	
  		mAdapter = new CustomAdapter(getActivity(), R.layout.row, mMessageList);
+ 		
  		
 // 		this.getListView().setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
  		setListAdapter(mAdapter);
@@ -204,7 +225,7 @@ public class ChatFragment extends ListFragment implements OnClickListener {
     	chatMessage.message = message;
 		mAdapter.add(chatMessage);
 		mAdapter.notifyDataSetChanged();
-		/* Det har været sjovt! */
+		/* Det har vï¿½ret sjovt! */
     }
     
     private void loadMessages() {
@@ -226,8 +247,8 @@ public class ChatFragment extends ListFragment implements OnClickListener {
 				case MessageTypes.PUBLISHMESSAGE:
 					addMessage(constructStringMessage((PublishMessage)msg.obj));
 					timestamp = (int) ((PublishMessage) msg.obj).timeStamp;
-					// save message to database
-//					mDBAdapter.insertMessage((PublishMessage)msg.obj);
+					//  save message to database
+					mDBAdapter.insertMessage((PublishMessage)msg.obj);
 					break;
 				case MessageTypes.GETONLINEUSERLIST:
 					GetOnlineUserList userlist = (GetOnlineUserList) msg.obj;
@@ -248,4 +269,10 @@ public class ChatFragment extends ListFragment implements OnClickListener {
 	    	}
 	    };
 	}
+    @Override
+    public void onStop()
+    {
+    	mDBAdapter.close();
+    	super.onStop();
+    }
 }

@@ -89,8 +89,8 @@ public class Client implements Runnable {
 	        int bytes = instream.available();
 	        if( bytes > 0 )
 	        {
-	        	 instream.read(buffer, 0, bytes);
-	        	 String data = new String(buffer,0,bytes);
+	        	 instream.read(buffer, 0, 1024);
+	        	 String data = new String(buffer,0,1024);
 	        	 handleData(data);
 	        	 this.dataReceivedTime = System.currentTimeMillis();
 	        }
