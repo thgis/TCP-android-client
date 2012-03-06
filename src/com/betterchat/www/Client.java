@@ -39,9 +39,8 @@ public class Client implements Runnable {
 	private volatile boolean stop = false;
 	private boolean mIsPaused;
 	
-	public Client(String ipAddress, String name, Handler handle)
+	public Client(String ipAddress, String name)
 	{
-		this.handle = handle;
 		Name = name;
 		buffer = new byte[1024];
 		this.ipadresse = ipAddress;
@@ -231,9 +230,12 @@ public class Client implements Runnable {
     	mIsPaused = true;
     }
     
-    public void resumeUpdate(Handler handler) {
-    	handle = handler;
+    public void resumeUpdate() {
     	mIsPaused = false;
+    }
+    
+    public void setHandler(Handler handler) {
+    	this.handle = handler;
     }
 
 	@Override

@@ -66,7 +66,7 @@ public class CopyOfChatterActivity extends ActionBarActivity {
             if(data != null) {
             	ReetainContainer container = (ReetainContainer) data;
             	client = container.mClient;
-            	client.resumeUpdate(handlerClient);
+//            	client.resumeUpdate(handlerClient);
             	mMessageList = container.mChatMessages;
             	
             	mCurrentView = savedInstanceState.getInt("currentView", 1);
@@ -274,7 +274,7 @@ public class CopyOfChatterActivity extends ActionBarActivity {
 	}
 
 	public boolean createClient() {
-    	client = new Client(mIpAddress, mUserName, handlerClient);
+//    	client = new Client(mIpAddress, mUserName, handlerClient);
     	boolean isConnected = client.connect();
     	if(isConnected) {
 	    	client.Start();

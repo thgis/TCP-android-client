@@ -1,12 +1,10 @@
 package com.betterchat.www.utility;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.Fragment;
 
 import com.betterchat.www.Client;
 import com.betterchat.www.MessageStructures.GetOnlineUserList;
-import com.betterchat.www.ui.ChatFragment;
 import com.google.gson.Gson;
 
 public class RetainedFragment extends Fragment {
@@ -15,11 +13,14 @@ public class RetainedFragment extends Fragment {
 	private String mUserName = "test";
 	private int timestamp = 0;
 	
-	private Handler mHandler;
     /**
      * Fragment initialization.  We way we want to be retained and
      * start our thread.
      */
+	public RetainedFragment() {
+		client = new Client(mIpAddress, mUserName);
+	}
+	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,7 +30,6 @@ public class RetainedFragment extends Fragment {
         setRetainInstance(true);
 
         // Start up the worker
-        client = new Client(mIpAddress, mUserName, mHandler);
         client.pauseUpdate();
         boolean isConnected = startClient();
         
@@ -51,11 +51,8 @@ public class RetainedFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        ChatFragment targetFragment = (ChatFragment) getTargetFragment();
-        mHandler = targetFragment.getHandler();
-        
         // We are ready for our thread to go.
-        client.resumeUpdate(mHandler);
+        client.resumeUpdate();
     }
 
     
@@ -87,8 +84,20 @@ public class RetainedFragment extends Fragment {
     	}
     	return isConnected;
     }
+	
+    /**
+     * This is called when the fragment is going away.  It is NOT called
+     * when the fragment is being propagated between activity instances.
+     */
+    @Override
+    public void onDestroy() {
+        // Make the thread go away.
+    	client.Stop();
+        super.onDestroy();
+    }
 
-	public void sendMessage(String serializedMessage) {
-		client.SendMessage(serializedMessage);
+	
+	public Client getClient() {
+		return client;
 	}
 }

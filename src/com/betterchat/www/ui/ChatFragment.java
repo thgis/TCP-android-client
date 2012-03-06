@@ -76,6 +76,8 @@ public class ChatFragment extends ListFragment implements OnClickListener {
         	mWorkFragment.setTargetFragment(this, 0);
         	fm.beginTransaction().add(mWorkFragment, "work").commit();
         }
+        client = mWorkFragment.getClient();
+        client.setHandler(handlerClient);
 //        mDBAdapter = new DBAdapter(getActivity());
 //        mDBAdapter.open();
     }
@@ -193,8 +195,7 @@ public class ChatFragment extends ListFragment implements OnClickListener {
     	message.sender = mUserName;
     	Gson gson = new Gson();
     	String serializedMessage = gson.toJson(message);
-//    	client.SendMessage(serializedMessage);
-    	mWorkFragment.sendMessage(serializedMessage);
+    	client.SendMessage(serializedMessage);
     	edit.setText("");
     }
     
@@ -247,8 +248,4 @@ public class ChatFragment extends ListFragment implements OnClickListener {
 	    	}
 	    };
 	}
-    
-    public Handler getHandler() {
-    	return handlerClient;
-    }
 }
