@@ -272,6 +272,10 @@ public class ChatFragment extends ListFragment implements OnClickListener {
     @Override
     public void onStop()
     {
+        // save timestamp
+        SharedPreferences settings = getActivity().getSharedPreferences(SHARED, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putLong(TIMESTAMP, timestamp);
     	mDBAdapter.close();
     	super.onStop();
     }
